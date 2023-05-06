@@ -1,0 +1,9 @@
+body {
+    background-color: #b2f6ff;
+    font-family: Arial, sans-serif;
+}
+
+#display {
+    border-left: 2px solid black;
+    padding: 5px;
+}
