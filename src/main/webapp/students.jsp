@@ -207,6 +207,7 @@ function checkUpdate(row) {
     <td><%= ssn %></td>
     <td><%= residency %></td>
   </tr> --%>
+  
 <%
   }
 %>
