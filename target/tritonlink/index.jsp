@@ -5,7 +5,7 @@
 </head>
 
 <body>
-  <h2>Hello Wowowowowowoow</h2>
+  <h2>Welcome to CSE132B homepage</h2>
 
   <table>
     <tr>

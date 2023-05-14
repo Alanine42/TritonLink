@@ -6,7 +6,7 @@
   try {
     Class.forName("org.postgresql.Driver");
     Connection conn = DriverManager.getConnection(
-        "jdbc:postgresql://localhost:5433/tritonlinkDB", "postgres", "409621a");
+        "jdbc:postgresql://localhost:5432/postgres", "postgres", "67984135");
     out.println("Connected to Postgres!");
 // [!] un/comment the line below to get syntax highlighting for below html codes. 
       //}
@@ -207,6 +207,7 @@ function checkUpdate(row) {
     <td><%= ssn %></td>
     <td><%= residency %></td>
   </tr> --%>
+  
 <%
   }
 %>
