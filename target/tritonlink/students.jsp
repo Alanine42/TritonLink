@@ -6,7 +6,7 @@
   try {
     Class.forName("org.postgresql.Driver");
     Connection conn = DriverManager.getConnection(
-        "jdbc:postgresql://localhost:5433/tritonlinkDB", "postgres", "409621a");
+        "jdbc:postgresql://localhost:5432/postgres", "postgres", "postgres");
     out.println("Connected to Postgres!");
 // [!] un/comment the line below to get syntax highlighting for below html codes. 
       //}
@@ -177,11 +177,11 @@ function checkUpdate(row) {
     <input type="hidden" name="student_id" value="<%= student_id %>">
     <td><input type="text" class="<%= rowN%>" name="student_id" size="12" value="<%= student_id %>" readonly onkeyup="checkUpdate(<%= rowN%>)"></td>
     <td><input type="text" class="<%= rowN%>" name="fname" size="12" value="<%= fname %>" onkeyup="checkUpdate(<%= rowN%>)"></td>
-    <td><input type="text" name="mname" size="12" value="<%= mname %>"></td>
+    <td><input type="text" name="mname" size="12" value="<%= mname %>" onkeyup="checkUpdate(<%= rowN%>)"></td>
     <td><input type="text" class="<%= rowN%>" name="lname" size="12" value="<%= lname %>" onkeyup="checkUpdate(<%= rowN%>)"></td>
     <td><input type="text" class="<%= rowN%>" name="ssn" size="12" value="<%= ssn %>" onkeyup="checkUpdate(<%= rowN%>)"></td>
     <td>
-      <select name="residency">
+      <select name="residency" onchange="checkUpdate(<%= rowN%>)">
         <option value="CA resident" <%= residency.equals("CA resident") ? "selected" : "" %>>CA resident</option>
         <option value="Non-CA US" <%= residency.equals("Non-CA US") ? "selected" : "" %>>Non-CA US</option>
         <option value="Foreign" <%= residency.equals("Foreign") ? "selected" : "" %>>Foreign</option>
@@ -207,6 +207,7 @@ function checkUpdate(row) {
     <td><%= ssn %></td>
     <td><%= residency %></td>
   </tr> --%>
+  
 <%
   }
 %>
