@@ -197,16 +197,6 @@ function checkUpdate(row) {
   </form>
 </tr>
 
-
-<%-- Old: just presenting the rows (No edit/delete) --%>
-  <%-- <tr>
-    <td><%= student_id %></td>
-    <td><%= fname %></td>
-    <td><%= mname %></td>
-    <td><%= lname %></td>
-    <td><%= ssn %></td>
-    <td><%= residency %></td>
-  </tr> --%>
   
 <%
   }

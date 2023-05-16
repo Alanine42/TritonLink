@@ -16,27 +16,32 @@
 <%
     // Get all the parameters from the form, enforce the non-null's
     String _student_id = request.getParameter("student_id");
-    String _fname = request.getParameter("fname");
-    String _mname = request.getParameter("mname");
-    String _lname = request.getParameter("lname");
-    String _ssn = request.getParameter("ssn");
-    String _residency = request.getParameter("residency");
-
+    int _section_id = 0;
+    if (request.getParameter("section_id") != null)
+    {
+        _section_id = Integer.parseInt(request.getParameter("section_id"));
+    }
+    int _unit = 0;
+    if (request.getParameter("unit") != null)
+    {
+        _unit = Integer.parseInt(request.getParameter("unit"));
+    }
+    String _grading_option = request.getParameter("grading_option");
+    String _enrollment_status = request.getParameter("enrollment_status");
     String action = request.getParameter("action"); 
 
     // Insertion Code
     if (action != null && action.equals("insert")) {
       conn.setAutoCommit(false);
-
+      
       PreparedStatement pstmt = conn.prepareStatement(
-          "insert into students values (?, ?, ?, ?, ?, ?)");
+          "insert into course_enrollment values (?, ?, ?, ?, ?)");
       
       pstmt.setString(1, _student_id);
-      pstmt.setString(2, _fname);
-      pstmt.setString(3, _mname);
-      pstmt.setString(4, _lname);
-      pstmt.setString(5, _ssn);
-      pstmt.setString(6, _residency);
+      pstmt.setInt(2, _section_id);
+      pstmt.setInt(3, _unit);
+      pstmt.setString(4, _grading_option);
+      pstmt.setString(5, _enrollment_status);
 
       pstmt.executeUpdate();
       conn.commit();
@@ -48,14 +53,13 @@
       conn.setAutoCommit(false);
 
       PreparedStatement pstmt = conn.prepareStatement(
-          "update students set fname=?, mname=?, lname=?, ssn=?, residency=? where student_id=?");
+          "update course_enrollment set unit=?, grading_option=?, enrollment_status=? where student_id=? and section_id=?");
       
-      pstmt.setString(1, _fname);
-      pstmt.setString(2, _mname);
-      pstmt.setString(3, _lname);
-      pstmt.setString(4, _ssn);
-      pstmt.setString(5, _residency);
-      pstmt.setString(6, _student_id);     // fill in the student_id wildcard
+      pstmt.setInt(1, _unit);
+      pstmt.setString(2, _grading_option);
+      pstmt.setString(3, _enrollment_status);
+      pstmt.setString(4, _student_id);
+      pstmt.setInt(5, _section_id);
       
       int rowCount = pstmt.executeUpdate();   // returns # of rows effected
       conn.commit();
@@ -67,16 +71,17 @@
       conn.setAutoCommit(false);
 
       PreparedStatement pstmt = conn.prepareStatement(
-          "delete from students where student_id=?");
+          "delete from course_enrollment where student_id=? and section_id=?");
 
       pstmt.setString(1, _student_id);
+      pstmt.setInt(2, _section_id);
 
       int rowCount = pstmt.executeUpdate();   // returns # of rows effected
       conn.commit();
       conn.setAutoCommit(true);
     }
 
-    response.sendRedirect("index.jsp?type=students");  // avoid refresh = re-insertion
+    response.sendRedirect("index.jsp?type=course_enrollment");  // avoid refresh = re-insertion
 
 %>
 
@@ -84,21 +89,20 @@
 <%-- <br><code>Statement code</code> --%>
 <%
     Statement stmt = conn.createStatement();
-    ResultSet rs = stmt.executeQuery("select * from students order by student_id");
+    ResultSet rs = stmt.executeQuery("select * from course_enrollment order by student_id, section_id");
 %>
 
 
 <%-- JS (rocks!) to validify form inputs before insertion  --%>
 <script>
 function checkInsert() {
-  var studentIdInsert = document.getElementById("student_id_insert");
-  var fnameInsert = document.getElementById("fname_insert");
-  var lnameInsert = document.getElementById("lname_insert");
-  var ssnInsert = document.getElementById("ssn_insert");
+  var student_id_insert = document.getElementById("student_id_insert");
+  var section_id_insert = document.getElementById("section_id_insert");
+  var unit_insert = document.getElementById("unit_insert");
 
   var insertButton = document.getElementById("insert_button");
   
-  if (studentIdInsert.value == "" || fnameInsert.value == "" || lnameInsert.value == "" || ssnInsert.value == "") {
+  if (student_id_insert.value == "" || section_id_insert.value == 0 || unit_insert.value == 0) {
     insertButton.disabled = true;
     //insertButton.style.opacity = "0.5"; // dim the button
   } else {
@@ -110,27 +114,31 @@ function checkInsert() {
 <%-- <br><code>Presentation & Insertion </code> --%>
 <table>
   <tr>
-    <th>Student ID</th>
-    <th>First Name</th>
-    <th style="color: gray;">Middle Name</th>
-    <th>Last Name</th>
-    <th>SSN</th>
-    <th>Residency</th>
+    <th>student ID</th>
+    <th>section ID</th>
+    <th>unit</th>
+    <th>grading option</th>
+    <th>enrollment status</th>
   </tr>
 
   <tr>
-    <form action="students.jsp" method="get">         
+    <form action="course_enrollment.jsp" method="get">         
       <input type="hidden" name="action" value="insert">
       <td><input type="text" name="student_id" size="12" id="student_id_insert" onkeyup="checkInsert()"></td>
-      <td><input type="text" name="fname" size="12" id="fname_insert" onkeyup="checkInsert()"></td>
-      <td><input type="text" name="mname" size="12"></td>
-      <td><input type="text" name="lname" size="12" id="lname_insert" onkeyup="checkInsert()"></td>
-      <td><input type="text" name="ssn" size="12" id="ssn_insert" onkeyup="checkInsert()"></td>
-      <td><select name="residency" >
-          <option value="CA resident">CA resident</option>
-          <option value="Non-CA US">Non-CA US</option>
-          <option value="Foreign">Foreign</option>
-          </select>
+      <td><input type="number" name="section_id" size="12" id="section_id_insert" onkeyup="checkInsert()" value="0"></td>
+
+      <td><input type="number" name="unit" size="12" id="unit_insert" onkeyup="checkInsert()" min="1", max="8" value="4"></td>
+      <td>
+        <select name="grading_option" >
+            <option value="letter">letter</option>
+            <option value="P_NP">P/NP</option>
+        </select>
+      </td>
+      <td>
+        <select name="enrollment_status" >
+            <option value="enroll">enroll</option>
+            <option value="waitlist">waitlist</option>
+        </select>
       </td>
       <td><input type="submit" value="Insert" id="insert_button" disabled></td>
     </form>
@@ -140,11 +148,10 @@ function checkInsert() {
   while (rs.next()) { 
     int rowN = rs.getRow();  // for JS checker to identify each row in the table
     String student_id = rs.getString("student_id");
-    String fname = rs.getString("fname");
-    String mname = rs.getString("mname");
-    String lname = rs.getString("lname");
-    String ssn = rs.getString("ssn");
-    String residency = rs.getString("residency");
+    int section_id = rs.getInt("section_id");
+    int unit = rs.getInt("unit");
+    String grading_option = rs.getString("grading_option");
+    String enrollment_status = rs.getString("enrollment_status");
 %>
 
 <%-- JS to validify form inputs before updating each row --%>
@@ -172,32 +179,49 @@ function checkUpdate(row) {
 
 <%-- New: presenting the rows with edit/delete --%>
 <tr>
-  <form action="students.jsp" method="get">         
+  <form action="course_enrollment.jsp" method="get">         
     <input type="hidden" name="action" value="update">
     <input type="hidden" name="student_id" value="<%= student_id %>">
+    <input type="hidden" name="section_id" value="<%= section_id %>">
     <td><input type="text" class="<%= rowN%>" name="student_id" size="12" value="<%= student_id %>" readonly onkeyup="checkUpdate(<%= rowN%>)"></td>
-    <td><input type="text" class="<%= rowN%>" name="fname" size="12" value="<%= fname %>" onkeyup="checkUpdate(<%= rowN%>)"></td>
-    <td><input type="text" name="mname" size="12" value="<%= mname %>" onkeyup="checkUpdate(<%= rowN%>)"></td>
-    <td><input type="text" class="<%= rowN%>" name="lname" size="12" value="<%= lname %>" onkeyup="checkUpdate(<%= rowN%>)"></td>
-    <td><input type="text" class="<%= rowN%>" name="ssn" size="12" value="<%= ssn %>" onkeyup="checkUpdate(<%= rowN%>)"></td>
+    <td><input type="number" class="<%= rowN%>" name="section_id" size="12" value="<%= section_id %>" readonly onkeyup="checkUpdate(<%= rowN%>)"></td>
+    <td><input type="number" class="<%= rowN%>" name="unit" size="12" value="<%= unit %>" onkeyup="checkUpdate(<%= rowN%>)"></td>
     <td>
-      <select name="residency" onchange="checkUpdate(<%= rowN%>)">
-        <option value="CA resident" <%= residency.equals("CA resident") ? "selected" : "" %>>CA resident</option>
-        <option value="Non-CA US" <%= residency.equals("Non-CA US") ? "selected" : "" %>>Non-CA US</option>
-        <option value="Foreign" <%= residency.equals("Foreign") ? "selected" : "" %>>Foreign</option>
-      </select>
+        <select name="grading_option" onchange="checkUpdate(<%= rowN%>)"> 
+          <option value="letter" <%= grading_option.equals("letter") ? "selected" : "" %>>letter</option>
+          <option value="P_NP" <%= grading_option.equals("P_NP") ? "selected" : "" %>>P_NP</option>
+        </select>
+    </td>
+    <td>
+        <select name="enrollment_status" onchange="checkUpdate(<%= rowN%>)">
+          <option value="enroll" <%= enrollment_status.equals("enroll") ? "selected" : "" %>>enroll</option>
+          <option value="waitlist" <%= enrollment_status.equals("waitlist") ? "selected" : "" %>>waitlist</option>
+        </select>
     </td>
     <td><input type="submit" id="update_button_<%= rowN%>" value="Update" disabled></td>
   </form>
   
-  <form action="students.jsp" method="get">         
+  <form action="course_enrollment.jsp" method="get">         
     <input type="hidden" name="action" value="delete">
     <input type="hidden" name="student_id" value="<%= student_id %>">
+    <input type="hidden" name="section_id" value="<%= section_id %>">
     <td><input type="submit" value="Delete"></td>
   </form>
 </tr>
 
-  
+
+<%-- Old: just presenting the rows (No edit/delete) --%>
+  <%-- <tr>
+    <td><%= course ID %></td>
+    <td><%= section ID %></td>
+
+    <td><%= quarter %></td>
+    <td><%= title %></td>
+    <td><%= faculty name %></td>
+    <td><%= avaliable seats %></td>
+    <td><%= total seats %></td>
+  </tr> --%>
+
 <%
   }
 %>

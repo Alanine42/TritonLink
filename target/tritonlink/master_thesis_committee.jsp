@@ -1,4 +1,5 @@
 <%@ page language="java" import="java.sql.*"  %>
+<%@ page import="java.util.ArrayList" %>
 
 
 <%-- <code>Open connection code</code> --%>
@@ -16,12 +17,10 @@
 <%
     // Get all the parameters from the form, enforce the non-null's
     String _student_id = request.getParameter("student_id");
-    String _fname = request.getParameter("fname");
-    String _mname = request.getParameter("mname");
-    String _lname = request.getParameter("lname");
-    String _ssn = request.getParameter("ssn");
-    String _residency = request.getParameter("residency");
-
+    String _faculty1 = request.getParameter("faculty1");
+    String _faculty2 = request.getParameter("faculty2");
+    String _faculty3 = request.getParameter("faculty3");
+    String _additional = request.getParameter("additional");
     String action = request.getParameter("action"); 
 
     // Insertion Code
@@ -29,14 +28,13 @@
       conn.setAutoCommit(false);
 
       PreparedStatement pstmt = conn.prepareStatement(
-          "insert into students values (?, ?, ?, ?, ?, ?)");
+          "insert into master_thesis_committee values (?, ?, ?, ?, ?)");
       
       pstmt.setString(1, _student_id);
-      pstmt.setString(2, _fname);
-      pstmt.setString(3, _mname);
-      pstmt.setString(4, _lname);
-      pstmt.setString(5, _ssn);
-      pstmt.setString(6, _residency);
+      pstmt.setString(2, _faculty1);
+      pstmt.setString(3, _faculty2);
+      pstmt.setString(4, _faculty3);
+      pstmt.setString(5, _additional);
 
       pstmt.executeUpdate();
       conn.commit();
@@ -48,14 +46,13 @@
       conn.setAutoCommit(false);
 
       PreparedStatement pstmt = conn.prepareStatement(
-          "update students set fname=?, mname=?, lname=?, ssn=?, residency=? where student_id=?");
+          "update master_thesis_committee set faculty1=?, faculty2=?, faculty3=?, additional=? where student_id=?");
       
-      pstmt.setString(1, _fname);
-      pstmt.setString(2, _mname);
-      pstmt.setString(3, _lname);
-      pstmt.setString(4, _ssn);
-      pstmt.setString(5, _residency);
-      pstmt.setString(6, _student_id);     // fill in the student_id wildcard
+      pstmt.setString(1, _faculty1);
+      pstmt.setString(2, _faculty2);
+      pstmt.setString(3, _faculty3);
+      pstmt.setString(4, _additional);     // fill in the student_id wildcard
+      pstmt.setString(5, _student_id);
       
       int rowCount = pstmt.executeUpdate();   // returns # of rows effected
       conn.commit();
@@ -67,7 +64,7 @@
       conn.setAutoCommit(false);
 
       PreparedStatement pstmt = conn.prepareStatement(
-          "delete from students where student_id=?");
+          "delete from master_thesis_committee where student_id=?");
 
       pstmt.setString(1, _student_id);
 
@@ -76,7 +73,7 @@
       conn.setAutoCommit(true);
     }
 
-    response.sendRedirect("index.jsp?type=students");  // avoid refresh = re-insertion
+    response.sendRedirect("index.jsp?type=master_thesis_committee");  // avoid refresh = re-insertion
 
 %>
 
@@ -84,7 +81,15 @@
 <%-- <br><code>Statement code</code> --%>
 <%
     Statement stmt = conn.createStatement();
-    ResultSet rs = stmt.executeQuery("select * from students order by student_id");
+    ResultSet rs = stmt.executeQuery("select * from master_thesis_committee order by student_id");
+
+    Statement stmt_faculty = conn.createStatement();
+    ResultSet rs_faculty = stmt_faculty.executeQuery("select * from faculties order by faculty_name");
+    ArrayList<String> faculty_names = new ArrayList<String>();
+    faculty_names.add("");
+    while (rs_faculty.next()) {
+      faculty_names.add(rs_faculty.getString("faculty_name"));
+    }
 %>
 
 
@@ -92,13 +97,9 @@
 <script>
 function checkInsert() {
   var studentIdInsert = document.getElementById("student_id_insert");
-  var fnameInsert = document.getElementById("fname_insert");
-  var lnameInsert = document.getElementById("lname_insert");
-  var ssnInsert = document.getElementById("ssn_insert");
-
   var insertButton = document.getElementById("insert_button");
   
-  if (studentIdInsert.value == "" || fnameInsert.value == "" || lnameInsert.value == "" || ssnInsert.value == "") {
+  if (studentIdInsert.value == "") {
     insertButton.disabled = true;
     //insertButton.style.opacity = "0.5"; // dim the button
   } else {
@@ -111,27 +112,40 @@ function checkInsert() {
 <table>
   <tr>
     <th>Student ID</th>
-    <th>First Name</th>
-    <th style="color: gray;">Middle Name</th>
-    <th>Last Name</th>
-    <th>SSN</th>
-    <th>Residency</th>
+    <th>Faculty1</th>
+    <th>Faculty2</th>
+    <th>Faculty3</th>
+    <th>Additional</th>
   </tr>
 
   <tr>
-    <form action="students.jsp" method="get">         
+    <form action="master_thesis_committee.jsp" method="get">         
       <input type="hidden" name="action" value="insert">
       <td><input type="text" name="student_id" size="12" id="student_id_insert" onkeyup="checkInsert()"></td>
-      <td><input type="text" name="fname" size="12" id="fname_insert" onkeyup="checkInsert()"></td>
-      <td><input type="text" name="mname" size="12"></td>
-      <td><input type="text" name="lname" size="12" id="lname_insert" onkeyup="checkInsert()"></td>
-      <td><input type="text" name="ssn" size="12" id="ssn_insert" onkeyup="checkInsert()"></td>
-      <td><select name="residency" >
-          <option value="CA resident">CA resident</option>
-          <option value="Non-CA US">Non-CA US</option>
-          <option value="Foreign">Foreign</option>
-          </select>
+      <%-- <td><input type="text" name="faculty_name" size="12" id="faculty_name_insert" onkeyup="checkInsert()"></td> --%>
+      <td>
+        <select name="faculty1" id="faculty1_insert" onchange="checkInsert()">
+          <% for (String faculty_name : faculty_names) { %>
+            <option value="<%= faculty_name %>"><%= faculty_name %></option>
+          <% } %>
+        </select>
       </td>
+      <td>
+        <select name="faculty2" id="faculty2_insert" onchange="checkInsert()">
+          <% for (String faculty_name : faculty_names) { %>
+            <option value="<%= faculty_name %>"><%= faculty_name %></option>
+          <% } %>
+        </select>
+      </td>
+      <td>
+        <select name="faculty3" id="faculty3_insert" onchange="checkInsert()">
+          <% for (String faculty_name : faculty_names) { %>
+            <option value="<%= faculty_name %>"><%= faculty_name %></option>
+          <% } %>
+        </select>
+      </td>
+      <td><input type="text" name="additional" size="12" ></td>
+      
       <td><input type="submit" value="Insert" id="insert_button" disabled></td>
     </form>
   </tr>
@@ -140,11 +154,11 @@ function checkInsert() {
   while (rs.next()) { 
     int rowN = rs.getRow();  // for JS checker to identify each row in the table
     String student_id = rs.getString("student_id");
-    String fname = rs.getString("fname");
-    String mname = rs.getString("mname");
-    String lname = rs.getString("lname");
-    String ssn = rs.getString("ssn");
-    String residency = rs.getString("residency");
+    String faculty1 = rs.getString("faculty1");
+    String faculty2 = rs.getString("faculty2");
+    String faculty3 = rs.getString("faculty3");
+    String additional = rs.getString("additional");
+
 %>
 
 <%-- JS to validify form inputs before updating each row --%>
@@ -172,31 +186,31 @@ function checkUpdate(row) {
 
 <%-- New: presenting the rows with edit/delete --%>
 <tr>
-  <form action="students.jsp" method="get">         
+  <form action="master_thesis_committee.jsp" method="get">         
     <input type="hidden" name="action" value="update">
     <input type="hidden" name="student_id" value="<%= student_id %>">
     <td><input type="text" class="<%= rowN%>" name="student_id" size="12" value="<%= student_id %>" readonly onkeyup="checkUpdate(<%= rowN%>)"></td>
-    <td><input type="text" class="<%= rowN%>" name="fname" size="12" value="<%= fname %>" onkeyup="checkUpdate(<%= rowN%>)"></td>
-    <td><input type="text" name="mname" size="12" value="<%= mname %>" onkeyup="checkUpdate(<%= rowN%>)"></td>
-    <td><input type="text" class="<%= rowN%>" name="lname" size="12" value="<%= lname %>" onkeyup="checkUpdate(<%= rowN%>)"></td>
-    <td><input type="text" class="<%= rowN%>" name="ssn" size="12" value="<%= ssn %>" onkeyup="checkUpdate(<%= rowN%>)"></td>
-    <td>
-      <select name="residency" onchange="checkUpdate(<%= rowN%>)">
-        <option value="CA resident" <%= residency.equals("CA resident") ? "selected" : "" %>>CA resident</option>
-        <option value="Non-CA US" <%= residency.equals("Non-CA US") ? "selected" : "" %>>Non-CA US</option>
-        <option value="Foreign" <%= residency.equals("Foreign") ? "selected" : "" %>>Foreign</option>
-      </select>
-    </td>
+    <td><input type="text" class="<%= rowN%>" name="faculty1" size="12" value="<%= faculty1 %>" onkeyup="checkUpdate(<%= rowN%>)"></td>
+    <td><input type="text" class="<%= rowN%>" name="faculty2" size="12" value="<%= faculty2 %>" onkeyup="checkUpdate(<%= rowN%>)"></td>
+    <td><input type="text" class="<%= rowN%>" name="faculty3" size="12" value="<%= faculty3 %>" onkeyup="checkUpdate(<%= rowN%>)"></td>
+    <td><input type="text" class="<%= rowN%>" name="additional" size="12" value="<%= additional %>" onkeyup="checkUpdate(<%= rowN%>)"></td>
     <td><input type="submit" id="update_button_<%= rowN%>" value="Update" disabled></td>
   </form>
   
-  <form action="students.jsp" method="get">         
+  <form action="master_thesis_committee.jsp" method="get">         
     <input type="hidden" name="action" value="delete">
-    <input type="hidden" name="student_id" value="<%= student_id %>">
+    <td><input type="hidden" name="student_id" value="<%= student_id %>"></td>
     <td><input type="submit" value="Delete"></td>
   </form>
 </tr>
 
+
+<%-- Old: just presenting the rows (No edit/delete) --%>
+  <%-- <tr>
+    <td><%= student_id %></td>
+    <td><%= department %></td>
+    <td><%= concentrations %></td>
+  </tr> --%>
   
 <%
   }
@@ -215,6 +229,8 @@ function checkUpdate(row) {
   } 
   catch (SQLException e) {
     out.println(e.getMessage());
+
+    // Triggers constraint ()
   }
   catch (Exception e) {
     out.println(e.getMessage());

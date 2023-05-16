@@ -1,5 +1,5 @@
 <%@ page language="java" import="java.sql.*"  %>
-
+<%@ page import="java.util.ArrayList" %>
 
 <%-- <code>Open connection code</code> --%>
 <% 
@@ -95,6 +95,14 @@
 <%
     Statement stmt = conn.createStatement();
     ResultSet rs = stmt.executeQuery("select * from phds order by student_id");
+
+    Statement stmt_dept = conn.createStatement();
+    ResultSet rs_dept = stmt_dept.executeQuery("select * from departments order by department");
+    ArrayList<String> depts = new ArrayList<String>();
+    depts.add("");  // empty option for the select tag
+    while (rs_dept.next()) {
+      depts.add(rs_dept.getString("department"));
+    }
 %>
 
 
@@ -146,7 +154,13 @@ function checkInsert() {
           <option value="Foreign">Foreign</option>
           </select>
       </td>
-      <td><input type="text" name="department" size="12" id="department_insert" onkeyup="checkInsert()"></td>
+      <%-- <td><input type="text" name="department" size="12" id="department_insert" onkeyup="checkInsert()"></td> --%>
+      <td><select name="department" id="department_insert" onchange="checkInsert()">
+          <% for (String dept : depts) { %>
+            <option value="<%= dept %>"><%= dept %></option>
+          <% } %>
+          </select>
+      </td>
       <td><input type="checkbox" name="is_candidate" value="Y">Is Candidate</td>
       <td><input type="text" name="advisor" size="12"></td>
       
@@ -218,7 +232,13 @@ function checkUpdate(row) {
         <option value="Foreign" <%= residency.equals("Foreign") ? "selected" : "" %>>Foreign</option>
       </select>
     </td>
-    <td><input type="text" class="<%= rowN%>" name="department" size="12" value="<%= department %>" onkeyup="checkUpdate(<%= rowN%>)"></td>
+    <td>
+      <select name="department" class="<%= rowN%>" onchange="checkUpdate(<%= rowN%>)">
+        <% for (String dept : depts) { %>
+          <option value="<%= dept %>" <%= department.equals(dept) ? "selected" : "" %>><%= dept %></option>
+        <% } %>
+      </select>
+    </td>
     <td><input type="checkbox" name="is_candidate" value="Y"  <%= (is_cand) ? "checked" : "" %> onchange="tickIt(<%= rowN%>)"></td>
     <td><input type="text" name="advisor" size="12" value="<%= advisor %>" onkeyup="checkUpdate(<%= rowN%>)"></td>
     <td><input type="submit" id="update_button_<%= rowN%>" value="Update" disabled></td>

@@ -1,4 +1,4 @@
-%@ page language="java" import="java.sql.*"  %>
+<%@ page language="java" import="java.sql.*" %>
 
 
 <%-- <code>Open connection code</code> --%>
@@ -21,7 +21,10 @@
     }
     String _degree = request.getParameter("degree");
     String _course_type = request.getParameter("course_type");
-    int _min_units = Integer.parseInt(request.getParameter("min_units"));
+    int _min_units = 0;
+    if (request.getParameter("min_units") != null) {
+      _min_units = Integer.parseInt(request.getParameter("min_units"));
+    }
 
     String action = request.getParameter("action"); 
 
@@ -30,12 +33,12 @@
       conn.setAutoCommit(false);
 
       PreparedStatement pstmt = conn.prepareStatement(
-          "insert into degree values (?, ?, ?)");
+          "insert into bs_requirement (degree, course_type, min_units) values (?, ?, ?)");
       
       pstmt.setString(1, _degree);
       pstmt.setString(2, _course_type);
       pstmt.setInt(3, _min_units);
-
+      
       pstmt.executeUpdate();
       conn.commit();
       conn.setAutoCommit(true);
@@ -46,7 +49,7 @@
       conn.setAutoCommit(false);
 
       PreparedStatement pstmt = conn.prepareStatement(
-          "update degree set degree=?, course_type=?, min_units=? where req_id=?");
+          "update bs_requirement set degree=?, course_type=?, min_units=? where req_id=?");
       
       pstmt.setString(1, _degree);
       pstmt.setString(2, _course_type);
@@ -63,7 +66,7 @@
       conn.setAutoCommit(false);
 
       PreparedStatement pstmt = conn.prepareStatement(
-          "delete from degree where req_id=?");
+          "delete from bs_requirement where req_id=?");
 
       pstmt.setInt(1, _req_id);
 
@@ -72,7 +75,7 @@
       conn.setAutoCommit(true);
     }
 
-    response.sendRedirect("index.jsp?type=degree");  // avoid refresh = re-insertion
+    response.sendRedirect("index.jsp?type=bs_requirement");  // avoid refresh = re-insertion
 
 %>
 
@@ -80,7 +83,7 @@
 <%-- <br><code>Statement code</code> --%>
 <%
     Statement stmt = conn.createStatement();
-    ResultSet rs = stmt.executeQuery("select * from degree order by req_id");
+    ResultSet rs = stmt.executeQuery("select * from bs_requirement order by degree");
 %>
 
 
@@ -111,8 +114,9 @@ function checkInsert() {
   </tr>
 
   <tr>
-    <form action="degree.jsp" method="get">         
+    <form action="bs_requirement.jsp" method="get">         
       <input type="hidden" name="action" value="insert">
+      <td></td>
       <td><input type="text" name="degree" size="12" id="degree_insert" onkeyup="checkInsert()"></td>
       <td><select name="course_type" >
           <option value="core">core</option>
@@ -160,7 +164,7 @@ function checkUpdate(row) {
 
 <%-- New: presenting the rows with edit/delete --%>
 <tr>
-  <form action="degree.jsp" method="get">         
+  <form action="bs_requirement.jsp" method="get">         
     <input type="hidden" name="action" value="update">
     <input type="hidden" name="req_id" value="<%= req_id %>">
     <td><input type="number" class="<%= rowN%>" name="req_id" size="12" value="<%= req_id %>" readonly onkeyup="checkUpdate(<%= rowN%>)"></td>
@@ -170,17 +174,16 @@ function checkUpdate(row) {
         <option value="core" <%= course_type.equals("core") ? "selected" : "" %>>core</option>
         <option value="elective" <%= course_type.equals("elective") ? "selected" : "" %>>elective</option>
         <option value="lower" <%= course_type.equals("lower") ? "selected" : "" %>>lower</option>
-        <option value="technical_electives" <%= course_type.equals("technical_electives") ? 
-            "selected" : "" %>>technical electives</option>
+        <option value="technical_electives" <%= course_type.equals("technical_electives") ? "selected" : "" %>>technical electives</option>
       </select>
     </td>
     <td><input type="number" class="<%= rowN%>" name="min_units" size="12" value="<%= min_units %>" onkeyup="checkUpdate(<%= rowN%>)"></td>
     <td><input type="submit" id="update_button_<%= rowN%>" value="Update" disabled></td>
   </form>
   
-  <form action="degree.jsp" method="get">         
+  <form action="bs_requirement.jsp" method="get">         
     <input type="hidden" name="action" value="delete">
-    <input type="hidden" name="req_id" value="<%= req_id %>">
+    <td><input type="hidden" name="req_id" value="<%= req_id %>"></td>
     <td><input type="submit" value="Delete"></td>
   </form>
 </tr>

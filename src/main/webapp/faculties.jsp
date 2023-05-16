@@ -143,7 +143,6 @@ function checkInsert() {
           <% } %>
         </select>
       </td>
-
       <td>
         <select name="department3">
 
@@ -163,9 +162,6 @@ function checkInsert() {
     String faculty_name = rs.getString("faculty_name");
     String title = rs.getString("title");
     String[] departments = (String[]) rs.getArray("departments").getArray();
-    for (String dept : departments) {
-      out.println(dept);     
-    }
     
 %>
 
@@ -174,9 +170,9 @@ function checkInsert() {
   <form action="faculties.jsp" method="get">         
     <input type="hidden" name="action" value="update">
     <input type="hidden" name="faculty_name" value="<%= faculty_name %>">
-    <td><input type="text" class="<%= rowN%>" name="faculty_name" size="12" value="<%= faculty_name %>" readonly onkeyup="checkUpdate(<%= rowN%>)"></td>
+    <td><input type="text" class="<%= rowN%>" name="faculty_name" size="12" value="<%= faculty_name %>" readonly ></td>
     <td>
-      <select name="title" class="<%= rowN%>" onchange="checkUpdate(<%= rowN%>)">
+      <select name="title" class="<%= rowN%>" >
         <option value="Professor" <%= title.equals("Professor") ? "selected" : "" %>>Professor</option>
         <option value="Assistant Professor" <%= title.equals("Assistant Professor") ? "selected" : "" %>>Assistant Professor</option>
         <option value="Associate Professor" <%= title.equals("Associate Professor") ? "selected" : "" %>>Associate Professor</option>
@@ -184,7 +180,7 @@ function checkInsert() {
       </select>
     </td>
     <td>
-      <select name="department1">
+      <select name="department1" >
         <% for (String dept : depts) { %>
           <option value="<%= dept %>" <%= (departments[0] != null && departments[0].equals(dept)) ? "selected" : "" %>><%= dept %></option>
         <% } %>
