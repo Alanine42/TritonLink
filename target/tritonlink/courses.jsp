@@ -9,7 +9,7 @@
     Class.forName("org.postgresql.Driver");
     Connection conn = DriverManager.getConnection(
         "jdbc:postgresql://localhost:5432/postgres", "postgres", "postgres");
-    out.println("Connected to Postgres!");
+    // out.println("Connected to Postgres!");
 // [!] un/comment the line below to get syntax highlighting for below html codes. 
       //}
 %>  
@@ -128,7 +128,7 @@ function checkInsert() {
     <th>Prereqs</th>
     <th>Grade Options</th>
     <th>Course Level</th>
-    <th>Units range</th>
+    <th>Units Range</th>
 
 
   </tr>

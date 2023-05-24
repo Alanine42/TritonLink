@@ -7,7 +7,7 @@
     Class.forName("org.postgresql.Driver");
     Connection conn = DriverManager.getConnection(
         "jdbc:postgresql://localhost:5432/postgres", "postgres", "postgres");
-    out.println("Connected to Postgres!");
+    // out.println("Connected to Postgres!");
 // [!] un/comment the line below to get syntax highlighting for below html codes. 
       //}
 %>  
@@ -204,9 +204,11 @@ function checkUpdate(row) {
   } 
   catch (SQLException e) {
     out.println(e.getMessage());
+    out.println("<br><br><h1>Please click on the brower's back button</h1><br>");
   }
   catch (Exception e) {
     out.println(e.getMessage());
+    out.println("<br><br><h1>Please click on the brower's back button</h1><br>");
   }
 
 %>

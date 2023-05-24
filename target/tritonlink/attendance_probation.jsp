@@ -1,4 +1,5 @@
 <%@ page language="java" import="java.sql.*"  %>
+<%@ page import="java.util.ArrayList" %>
 
 
 <%-- <code>Open connection code</code> --%>
@@ -7,7 +8,7 @@
     Class.forName("org.postgresql.Driver");
     Connection conn = DriverManager.getConnection(
         "jdbc:postgresql://localhost:5432/postgres", "postgres", "postgres");
-    out.println("Connected to Postgres!");
+    // out.println("Connected to Postgres!");
 // [!] un/comment the line below to get syntax highlighting for below html codes. 
       //}
 %>
@@ -16,8 +17,8 @@
 <%
     // Get all the parameters from the form, enforce the non-null's
     String _student_id = request.getParameter("student_id");
-    String _from = request.getParameter("from");
-    String _to = request.getParameter("to");
+    String _from = request.getParameter("from_");
+    String _to = request.getParameter("to_");
     String _status = request.getParameter("status");
     String _reason = request.getParameter("reason");
 
@@ -84,19 +85,26 @@
 <%
     Statement stmt = conn.createStatement();
     ResultSet rs = stmt.executeQuery("select * from attendance_probation order by student_id");
+
+    Statement stmt_student = conn.createStatement();
+    ResultSet rs_student = stmt_student.executeQuery("select student_id from students order by student_id");
+    ArrayList<String> student_ids = new ArrayList<String>();
+    while (rs_student.next()) {
+      student_ids.add(rs_student.getString("student_id"));
+    }
 %>
 
 
 <%-- JS (rocks!) to validify form inputs before insertion  --%>
 <script>
 function checkInsert() {
-  var studentIdInsert = document.getElementById("student_id_insert");
+
   var from_insert = document.getElementById("from_insert");
   var to_insert = document.getElementById("to_insert");
 
   var insertButton = document.getElementById("insert_button");
   
-  if (studentIdInsert.value == "" || from_insert.value == "" || to_insert.value == "" ) {
+  if (from_insert.value == "" || to_insert.value == "" ) {
     insertButton.disabled = true;
     //insertButton.style.opacity = "0.5"; // dim the button
   } else {
@@ -109,18 +117,25 @@ function checkInsert() {
 <table>
   <tr>
     <th>Student ID</th>
-    <th>from</th>
-    <th>to</th>
-    <th>status</th>
-    <th>reason</th>
+    <th>From</th>
+    <th>To</th>
+    <th>Status</th>
+    <th>Reason</th>
   </tr>
 
   <tr>
     <form action="attendance_probation.jsp" method="get">         
       <input type="hidden" name="action" value="insert">
-      <td><input type="text" name="student_id" size="12" id="student_id_insert" onkeyup="checkInsert()"></td>
-      <td><input type="text" name="from" size="12" id="from_insert" onkeyup="checkInsert()"></td>
-      <td><input type="text" name="to" size="12" id="to_insert" onkeyup="checkInsert()"></td>
+      <%-- <td><input type="text" name="student_id" size="12" id="student_id_insert" onkeyup="checkInsert()"></td> --%>
+      <td>
+        <select name="student_id">
+          <% for (String student_id : student_ids) { %>
+            <option value="<%= student_id %>"><%= student_id %></option>
+          <% } %>
+        </select>
+      </td>
+      <td><input type="text" name="from_" size="12" id="from_insert" onkeyup="checkInsert()"></td>
+      <td><input type="text" name="to_" size="12" id="to_insert" onkeyup="checkInsert()"></td>
       <td><select name="status" >
           <option value="attendance">attendance</option>
           <option value="probation">probation</option>
@@ -170,8 +185,8 @@ function checkUpdate(row) {
     <input type="hidden" name="action" value="update">
     <input type="hidden" name="student_id" value="<%= student_id %>">
     <td><input type="text" class="<%= rowN%>" name="student_id" size="12" value="<%= student_id %>" readonly onkeyup="checkUpdate(<%= rowN%>)"></td>
-    <td><input type="text" class="<%= rowN%>" name="from" size="12" value="<%= from %>" onkeyup="checkUpdate(<%= rowN%>)"></td>
-    <td><input type="text" class="<%= rowN%>" name="to" size="12" value="<%= to %>" onkeyup="checkUpdate(<%= rowN%>)"></td>
+    <td><input type="text" class="<%= rowN%>" name="from_" size="12" value="<%= from %>" onkeyup="checkUpdate(<%= rowN%>)"></td>
+    <td><input type="text" class="<%= rowN%>" name="to_" size="12" value="<%= to %>" onkeyup="checkUpdate(<%= rowN%>)"></td>
     <td>
       <select name="status" onchange="checkUpdate(<%= rowN%>)">
         <option value="attendance" <%= status.equals("attendance") ? "selected" : "" %>>attendance</option>
@@ -185,8 +200,8 @@ function checkUpdate(row) {
   <form action="attendance_probation.jsp" method="get">         
     <input type="hidden" name="action" value="delete">
     <input type="hidden" name="student_id" value="<%= student_id %>">
-    <input type="hidden" name="from" value="<%= from %>">
-    <input type="hidden" name="to" value="<%= to %>">
+    <input type="hidden" name="from_" value="<%= from %>">
+    <input type="hidden" name="to_" value="<%= to %>">
     <td><input type="submit" value="Delete"></td>
   </form>
 </tr>
@@ -203,15 +218,17 @@ function checkUpdate(row) {
 
 <%-- <br><code>Close connection code</code> --%>
 <%
-    rs.close();
+    //rs.close();
     stmt.close();
     conn.close();
   } 
   catch (SQLException e) {
-    out.println(e.getMessage());
+    out.println(e);
+    out.println("<br><br><h1>Please click on the brower's back button</h1><br>");
   }
   catch (Exception e) {
-    out.println(e.getMessage());
+    out.println(e);
+    out.println("<br><br><h1>Please click on the brower's back button</h1><br>");
   }
 
 %>

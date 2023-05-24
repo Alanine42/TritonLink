@@ -1,5 +1,6 @@
 <%@ page language="java" import="java.sql.*"  %>
 <%@ page import="java.lang.Integer"  %>
+<%@ page import="java.util.ArrayList"  %>
 
 
 <%-- <code>Open connection code</code> --%>
@@ -8,7 +9,7 @@
     Class.forName("org.postgresql.Driver");
     Connection conn = DriverManager.getConnection(
         "jdbc:postgresql://localhost:5432/postgres", "postgres", "postgres");
-    out.println("Connected to Postgres!");
+    // out.println("Connected to Postgres!");
 // [!] un/comment the line below to get syntax highlighting for below html codes. 
       //}
 %>  
@@ -88,18 +89,32 @@
 <%
     Statement stmt = conn.createStatement();
     ResultSet rs = stmt.executeQuery("select * from classes order by course_id");
+
+    Statement stmt_courses = conn.createStatement();
+    ResultSet rs_courses = stmt_courses.executeQuery("select course_id from courses order by course_id");
+    ArrayList<String> course_ids = new ArrayList<String>();
+    while (rs_courses.next()) {
+      course_ids.add(rs_courses.getString("course_id"));
+    }
+
+    Statement stmt_faculties = conn.createStatement();
+    ResultSet rs_faculties = stmt_faculties.executeQuery("select faculty_name from faculties order by faculty_name");
+    ArrayList<String> faculty_names = new ArrayList<String>();
+    while (rs_faculties.next()) {
+      faculty_names.add(rs_faculties.getString("faculty_name"));
+    }
 %>
 
 
 <%-- JS (rocks!) to validify form inputs before insertion  --%>
 <script>
 function checkInsert() {
-  var courseIDInsert = document.getElementById("course_id_insert");
+  var title_insert = document.getElementById("title_insert"); 
   var available_seats_insert = document.getElementById("available_seats_insert");
   var total_seats_insert = document.getElementById("total_seats_insert");
   var insertButton = document.getElementById("insert_button");
   
-  let invalid = courseIDInsert.value == "" || available_seats_insert < 0 || total_seats_insert < 0;
+  let invalid = title_insert.value == "" ||  available_seats_insert < 0 || total_seats_insert < 0;
 
   if (invalid) {
     insertButton.disabled = true;
@@ -126,10 +141,24 @@ function checkInsert() {
     <form action="classes.jsp" method="get">         
       <input type="hidden" name="action" value="insert">
       <td></td>
-      <td><input type="text" name="course_id" size="12" id="course_id_insert" onkeyup="checkInsert()"></td>
+      <%-- <td><input type="text" name="course_id" size="12" id="course_id_insert" onkeyup="checkInsert()"></td> --%>
+      <td>
+        <select name="course_id">
+          <% for (String course_id : course_ids) { %>
+            <option value="<%= course_id %>"><%= course_id %></option>
+          <% } %>
+        </select>
+      </td>
       <td><input type="text" name="quarter" size="12" id="quarter_insert" onkeyup="checkInsert()"></td>
       <td><input type="text" name="title" size="12" id="title_insert" onkeyup="checkInsert()"></td>
-      <td><input type="text" name="faculty_name" size="12" id="faculty_name_insert" onkeyup="checkInsert()"></td>
+      <%-- <td><input type="text" name="faculty_name" size="12" id="faculty_name_insert" onkeyup="checkInsert()"></td> --%>
+      <td>
+        <select name="faculty_name">
+          <% for (String faculty_name : faculty_names) { %>
+            <option value="<%= faculty_name %>"><%= faculty_name %></option>
+          <% } %>
+        </select>
+      </td>
       <td><input type="text" name="available_seats" size="12" id="available_seats_insert" onkeyup="checkInsert()" value="0"></td>
       <td><input type="text" name="total_seats" size="12" id="total_seats_insert" onkeyup="checkInsert()" value="0"></td>
       <td><input type="submit" value="Insert" id="insert_button" disabled></td>
@@ -180,7 +209,7 @@ function checkUpdate(row) {
     <td><input type="text" class="<%= rowN%>" name="course_id" size="12" value="<%= course_id %>" readonly onkeyup="checkUpdate(<%= rowN%>)"></td>
     <td><input type="text" class="<%= rowN%>" name="quarter" size="12" value="<%= quarter %>" onkeyup="checkUpdate(<%= rowN%>)"></td>
     <td><input type="text" class="<%= rowN%>" name="title" size="12" value="<%= title %>" onkeyup="checkUpdate(<%= rowN%>)"></td>
-    <td><input type="text" class="<%= rowN%>" name="faculty_name" size="12" value="<%= faculty_name %>" readonly onkeyup="checkUpdate(<%= rowN%>)"></td>
+    <td><input type="text" class="<%= rowN%>" name="faculty_name" size="12" value="<%= faculty_name %>" onkeyup="checkUpdate(<%= rowN%>)"></td>
     <td><input type="number" class="<%= rowN%>" name="available_seats" size="12" value="<%= available_seats %>" readonly onkeyup="checkUpdate(<%= rowN%>)"></td>
     <td><input type="number" class="<%= rowN%>" name="total_seats" size="12" value="<%= total_seats %>" onkeyup="checkUpdate(<%= rowN%>)"></td>
     <td><input type="submit" id="update_button_<%= rowN%>" value="Update" disabled></td>

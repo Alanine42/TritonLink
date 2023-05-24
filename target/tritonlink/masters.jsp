@@ -1,5 +1,5 @@
 <%@ page language="java" import="java.sql.*"  %>
-
+<%@ page import="java.util.ArrayList" %>
 
 <%-- <code>Open connection code</code> --%>
 <% 
@@ -7,7 +7,7 @@
     Class.forName("org.postgresql.Driver");
     Connection conn = DriverManager.getConnection(
         "jdbc:postgresql://localhost:5432/postgres", "postgres", "postgres");
-    out.println("Connected to Postgres!");
+    // out.println("Connected to Postgres!");
 // [!] un/comment the line below to get syntax highlighting for below html codes. 
       //}
 %>  
@@ -91,6 +91,14 @@
 <%
     Statement stmt = conn.createStatement();
     ResultSet rs = stmt.executeQuery("select * from masters order by student_id");
+
+    Statement stmt_dept = conn.createStatement();
+    ResultSet rs_dept = stmt_dept.executeQuery("select * from departments order by department");
+    ArrayList<String> depts = new ArrayList<String>();
+    depts.add("");  // empty option for the select tag
+    while (rs_dept.next()) {
+      depts.add(rs_dept.getString("department"));
+    }
 %>
 
 
@@ -141,7 +149,13 @@ function checkInsert() {
           <option value="Foreign">Foreign</option>
           </select>
       </td>
-      <td><input type="text" name="department" size="12" id="department_insert" onkeyup="checkInsert()"></td>
+      <%-- <td><input type="text" name="department" size="12" id="department_insert" onkeyup="checkInsert()"></td> --%>
+      <td><select name="department" id="department_insert" onchange="checkInsert()">
+          <% for (String dept : depts) { %>
+            <option value="<%= dept %>"><%= dept %></option>
+          <% } %>
+          </select>
+      </td>
       <td><input type="text" name="concentrations" size="12" id="concentrations_insert" ></td>
       
       <td><input type="submit" value="Insert" id="insert_button" disabled></td>
@@ -231,9 +245,11 @@ function checkUpdate(row) {
   } 
   catch (SQLException e) {
     out.println(e.getMessage());
+    out.println("<br><br><h1>Please click on the brower's back button</h1><br>");
   }
   catch (Exception e) {
     out.println(e.getMessage());
+    out.println("<br><br><h1>Please click on the brower's back button</h1><br>");
   }
 
 %>

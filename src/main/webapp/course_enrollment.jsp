@@ -1,4 +1,6 @@
 <%@ page language="java" import="java.sql.*"  %>
+<%@ page import="java.util.ArrayList" %>
+<%@ page import="java.util.HashMap" %>
 
 
 <%-- <code>Open connection code</code> --%>
@@ -7,7 +9,7 @@
     Class.forName("org.postgresql.Driver");
     Connection conn = DriverManager.getConnection(
         "jdbc:postgresql://localhost:5432/postgres", "postgres", "postgres");
-    out.println("Connected to Postgres!");
+    // out.println("Connected to Postgres!");
 // [!] un/comment the line below to get syntax highlighting for below html codes. 
       //}
 %>  
@@ -90,6 +92,22 @@
 <%
     Statement stmt = conn.createStatement();
     ResultSet rs = stmt.executeQuery("select * from course_enrollment order by student_id, section_id");
+
+    Statement stmt_students = conn.createStatement();
+    ResultSet rs_students = stmt_students.executeQuery("select student_id from students order by student_id");
+    ArrayList<String> student_ids = new ArrayList<String>();
+    while (rs_students.next()) {
+      student_ids.add(rs_students.getString("student_id"));
+    }
+
+    Statement stmt_sections = conn.createStatement();
+    ResultSet rs_sections = stmt_sections.executeQuery("select section_id from classes order by section_id");
+    ArrayList<Integer> section_ids = new ArrayList<Integer>();
+    while (rs_sections.next()) {
+      section_ids.add(rs_sections.getInt("section_id"));
+    }
+
+
 %>
 
 
@@ -124,8 +142,24 @@ function checkInsert() {
   <tr>
     <form action="course_enrollment.jsp" method="get">         
       <input type="hidden" name="action" value="insert">
-      <td><input type="text" name="student_id" size="12" id="student_id_insert" onkeyup="checkInsert()"></td>
-      <td><input type="number" name="section_id" size="12" id="section_id_insert" onkeyup="checkInsert()" value="0"></td>
+      <%-- <td><input type="text" name="student_id" size="12" id="student_id_insert" onkeyup="checkInsert()"></td> --%>
+      <td>
+        <select name="student_id" id="student_id_insert" onchange="checkInsert()">
+          <option value="">-- select student --</option>
+          <% for (String student_id : student_ids) { %>
+            <option value="<%= student_id %>"><%= student_id %></option>
+          <% } %>
+        </select>
+      </td>
+      <%-- <td><input type="number" name="section_id" size="12" id="section_id_insert" onkeyup="checkInsert()" value="0"></td> --%>
+      <td>
+        <select name="section_id" id="section_id_insert" onchange="checkInsert()">
+          <option value="0">-- select section --</option>
+          <% for (int section_id : section_ids) { %>
+            <option value="<%= section_id %>"><%= section_id %></option>
+          <% } %>
+        </select>
+      </td>
 
       <td><input type="number" name="unit" size="12" id="unit_insert" onkeyup="checkInsert()" min="1", max="8" value="4"></td>
       <td>
@@ -239,9 +273,11 @@ function checkUpdate(row) {
   } 
   catch (SQLException e) {
     out.println(e.getMessage());
+    out.println("<br><br><h1>Please click on the brower's back button</h1><br>");
   }
   catch (Exception e) {
     out.println(e.getMessage());
+    out.println("<br><br><h1>Please click on the brower's back button</h1><br>");
   }
 
 %>

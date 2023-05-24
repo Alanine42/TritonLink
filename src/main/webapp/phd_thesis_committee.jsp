@@ -8,7 +8,7 @@
     Class.forName("org.postgresql.Driver");
     Connection conn = DriverManager.getConnection(
         "jdbc:postgresql://localhost:5432/postgres", "postgres", "postgres");
-    out.println("Connected to Postgres!");
+    // out.println("Connected to Postgres!");
 // [!] un/comment the line below to get syntax highlighting for below html codes. 
       //}
 %>  
@@ -20,7 +20,7 @@
     String _faculty1 = request.getParameter("faculty1");
     String _faculty2 = request.getParameter("faculty2");
     String _faculty3 = request.getParameter("faculty3");
-    String _facultyOut = request.getParameter("facultyOut");
+    String _facultyout = request.getParameter("facultyout");
     String _additional = request.getParameter("additional");
     String action = request.getParameter("action"); 
 
@@ -35,7 +35,7 @@
       pstmt.setString(2, _faculty1);
       pstmt.setString(3, _faculty2);
       pstmt.setString(4, _faculty3);
-      pstmt.setString(5, _facultyOut);
+      pstmt.setString(5, _facultyout);
       pstmt.setString(6, _additional);
 
       pstmt.executeUpdate();
@@ -48,12 +48,12 @@
       conn.setAutoCommit(false);
 
       PreparedStatement pstmt = conn.prepareStatement(
-          "update phd_thesis_committee set faculty1=?, faculty2=?, faculty3=?, facultyOut=?, additional=? where student_id=?");
+          "update phd_thesis_committee set faculty1=?, faculty2=?, faculty3=?, facultyout=?, additional=? where student_id=?");
       
       pstmt.setString(1, _faculty1);
       pstmt.setString(2, _faculty2);
       pstmt.setString(3, _faculty3);
-      pstmt.setString(4, _facultyOut);
+      pstmt.setString(4, _facultyout);
       pstmt.setString(5, _additional);     // fill in the student_id wildcard
       pstmt.setString(6, _student_id);
       
@@ -85,6 +85,14 @@
 <%
     Statement stmt = conn.createStatement();
     ResultSet rs = stmt.executeQuery("select * from phd_thesis_committee order by student_id");
+    
+    Statement stmt_student = conn.createStatement();
+    ResultSet rs_student = stmt_student.executeQuery("select * from phds order by student_id");
+    ArrayList<String> student_ids = new ArrayList<String>();
+    student_ids.add("");
+    while (rs_student.next()) {
+      student_ids.add(rs_student.getString("student_id"));
+    }
 
     Statement stmt_faculty = conn.createStatement();
     ResultSet rs_faculty = stmt_faculty.executeQuery("select * from faculties order by faculty_name");
@@ -125,7 +133,14 @@ function checkInsert() {
   <tr>
     <form action="phd_thesis_committee.jsp" method="get">         
       <input type="hidden" name="action" value="insert">
-      <td><input type="text" name="student_id" size="12" id="student_id_insert" onkeyup="checkInsert()"></td>
+      <%-- <td><input type="text" name="student_id" size="12" id="student_id_insert" onkeyup="checkInsert()"></td> --%>
+      <td>
+        <select name="student_id" id="student_id_insert" onchange="checkInsert()">
+          <% for (String student_id : student_ids) { %>
+            <option value="<%= student_id %>"><%= student_id %></option>
+          <% } %>
+        </select>
+      </td>
       <%-- <td><input type="text" name="faculty_name" size="12" id="faculty_name_insert" onkeyup="checkInsert()"></td> --%>
       <td>
         <select name="faculty1" id="faculty1_insert" onchange="checkInsert()">
@@ -149,7 +164,7 @@ function checkInsert() {
         </select>
       </td>
         <td>
-            <select name="facultyOut" id="facultyOut_insert" onchange="checkInsert()">
+            <select name="facultyout" id="facultyout_insert" onchange="checkInsert()">
             <% for (String faculty_name : faculty_names) { %>
                 <option value="<%= faculty_name %>"><%= faculty_name %></option>
             <% } %>
@@ -168,7 +183,7 @@ function checkInsert() {
     String faculty1 = rs.getString("faculty1");
     String faculty2 = rs.getString("faculty2");
     String faculty3 = rs.getString("faculty3");
-    String facultyOut = rs.getString("facultyOut");
+    String facultyout = rs.getString("facultyout");
     String additional = rs.getString("additional");
 
 %>
@@ -205,8 +220,8 @@ function checkUpdate(row) {
     <td><input type="text" class="<%= rowN%>" name="faculty1" size="12" value="<%= faculty1 %>" onkeyup="checkUpdate(<%= rowN%>)"></td>
     <td><input type="text" class="<%= rowN%>" name="faculty2" size="12" value="<%= faculty2 %>" onkeyup="checkUpdate(<%= rowN%>)"></td>
     <td><input type="text" class="<%= rowN%>" name="faculty3" size="12" value="<%= faculty3 %>" onkeyup="checkUpdate(<%= rowN%>)"></td>
-    <td><input type="text" class="<%= rowN%>" name="facultyOut" size="12" value="<%= facultyOut %>" onkeyup="checkUpdate(<%= rowN%>)"></td>
-    <td><input type="text" class="<%= rowN%>" name="additional" size="12" value="<%= additional %>" onkeyup="checkUpdate(<%= rowN%>)"></td>
+    <td><input type="text" class="<%= rowN%>" name="facultyout" size="12" value="<%= facultyout %>" onkeyup="checkUpdate(<%= rowN%>)"></td>
+    <td><input type="text" name="additional" size="12" value="<%= additional %>" onkeyup="checkUpdate(<%= rowN%>)"></td>
     <td><input type="submit" id="update_button_<%= rowN%>" value="Update" disabled></td>
   </form>
   
@@ -242,11 +257,13 @@ function checkUpdate(row) {
   } 
   catch (SQLException e) {
     out.println(e.getMessage());
+    out.println("<br><br><h1>Please click on the brower's back button</h1><br>");
 
     // Triggers constraint ()
   }
   catch (Exception e) {
     out.println(e.getMessage());
+    out.println("<br><br><h1>Please click on the brower's back button</h1><br>");
   }
 
 %>
