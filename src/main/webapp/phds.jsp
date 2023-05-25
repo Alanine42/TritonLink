@@ -154,7 +154,7 @@ function checkInsert() {
           <option value="Foreign">Foreign</option>
           </select>
       </td>
-      <%-- <td><input type="text" name="department" size="12" id="department_insert" onkeyup="checkInsert()"></td> --%>
+      <%-- <td><input type="text" name="department" size="20" id="department_insert" onkeyup="checkInsert()"></td> --%>
       <td><select name="department" id="department_insert" onchange="checkInsert()">
           <% for (String dept : depts) { %>
             <option value="<%= dept %>"><%= dept %></option>

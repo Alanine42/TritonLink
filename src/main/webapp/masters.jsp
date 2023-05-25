@@ -149,7 +149,7 @@ function checkInsert() {
           <option value="Foreign">Foreign</option>
           </select>
       </td>
-      <%-- <td><input type="text" name="department" size="12" id="department_insert" onkeyup="checkInsert()"></td> --%>
+      <%-- <td><input type="text" name="department" size="20" id="department_insert" onkeyup="checkInsert()"></td> --%>
       <td><select name="department" id="department_insert" onchange="checkInsert()">
           <% for (String dept : depts) { %>
             <option value="<%= dept %>"><%= dept %></option>
@@ -215,7 +215,7 @@ function checkUpdate(row) {
         <option value="Foreign" <%= residency.equals("Foreign") ? "selected" : "" %>>Foreign</option>
       </select>
     </td>
-    <td><input type="text" class="<%= rowN%>" name="department" size="12" value="<%= department %>" onkeyup="checkUpdate(<%= rowN%>)"></td>
+    <td><input type="text" class="<%= rowN%>" name="department" size="30" value="<%= department %>" onkeyup="checkUpdate(<%= rowN%>)"></td>
     <td><input type="text" name="concentrations" size="12" value="<%= concentrations %>" onkeyup="checkUpdate(<%= rowN%>)"></td>
     <td><input type="submit" id="update_button_<%= rowN%>" value="Update" disabled></td>
   </form>

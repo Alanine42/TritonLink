@@ -20,9 +20,11 @@
     if (request.getParameter("section_id") != null) {
       _section_id = Integer.parseInt(request.getParameter("section_id"));
     }
-    String _date = request.getParameter("date");
+    String _type = request.getParameter("type");
+    String _days = request.getParameter("days");
     String _time = request.getParameter("time");
     String _room_id = request.getParameter("room_id");
+    String _mandatory = request.getParameter("mandatory");
 
     String action = request.getParameter("action"); 
 
@@ -31,12 +33,14 @@
       conn.setAutoCommit(false);
       
       PreparedStatement pstmt = conn.prepareStatement(
-          "insert into review_sessions values (?, ?, ?, ?)");
+          "insert into meetings values (?, ?, ?, ?, ?, ?)");
       
       pstmt.setInt(1, _section_id);
-      pstmt.setString(2, _date);
-      pstmt.setString(3, _time);
-      pstmt.setString(4, _room_id);
+      pstmt.setString(2, _type);
+      pstmt.setString(3, _days);
+      pstmt.setString(4, _time);
+      pstmt.setString(5, _room_id);
+      pstmt.setString(6, _mandatory);
 
       pstmt.executeUpdate();
       conn.commit();
@@ -48,12 +52,14 @@
       conn.setAutoCommit(false);
 
       PreparedStatement pstmt = conn.prepareStatement(
-          "update review_sessions set room_id=? where section_id=? and date=? and time=?");
+          "update meetings set days=?, time=?, room_id=?, mandatory=? where section_id=? and type=?");
       
-      pstmt.setString(1, _room_id);
-      pstmt.setInt(2, _section_id);
-      pstmt.setString(3, _date);
-      pstmt.setString(4, _time);
+      pstmt.setString(1, _days);
+      pstmt.setString(2, _time);
+      pstmt.setString(3, _room_id);
+      pstmt.setString(4, _mandatory);
+      pstmt.setInt(5, _section_id);
+      pstmt.setString(6, _type);
       
       int rowCount = pstmt.executeUpdate();   // returns # of rows effected
       conn.commit();
@@ -65,18 +71,17 @@
       conn.setAutoCommit(false);
 
       PreparedStatement pstmt = conn.prepareStatement(
-          "delete from review_sessions where section_id=?, date=?, time=?");
+          "delete from meetings where section_id=?, type=?");
 
       pstmt.setInt(1, _section_id);
-      pstmt.setString(2, _date);
-      pstmt.setString(3, _time);
+      pstmt.setString(2, _type);
 
       int rowCount = pstmt.executeUpdate();   // returns # of rows effected
       conn.commit();
       conn.setAutoCommit(true);
     }
 
-    response.sendRedirect("index.jsp?type=review_sessions");  // avoid refresh = re-insertion
+    response.sendRedirect("index.jsp?type=meetings");  // avoid refresh = re-insertion
 
 %>
 
@@ -84,7 +89,7 @@
 <%-- <br><code>Statement code</code> --%>
 <%
     Statement stmt = conn.createStatement();
-    ResultSet rs = stmt.executeQuery("select * from review_sessions order by section_id, date, time");
+    ResultSet rs = stmt.executeQuery("select * from meetings order by section_id, type");
 
     Statement stmt_section = conn.createStatement();
     ResultSet rs_section = stmt_section.executeQuery("select section_id from classes order by section_id");
@@ -101,7 +106,7 @@
 <%-- JS (rocks!) to validify form inputs before insertion  --%>
 <script>
 function checkInsert() {
-  var date_insert = document.getElementById("date_insert");
+  var days_insert = document.getElementById("days_insert");
   var time_insert = document.getElementById("time_insert");
   var room_id_insert = document.getElementById("room_id_insert");
 
@@ -120,15 +125,16 @@ function checkInsert() {
 <table>
   <tr>
     <th>section ID</th>
-    <th>date</th>
+    <th>type</th>
+    <th>days</th>
     <th>time</th>
     <th>room ID</th>
+    <th>mandatory</th>
   </tr>
 
   <tr>
-    <form action="review_sessions.jsp" method="get">         
+    <form action="meetings.jsp" method="get">         
       <input type="hidden" name="action" value="insert">
-      <%-- <td><input type="number" name="section_id" size="12" id="section_id_insert" onkeyup="checkInsert()" value="0"></td> --%>
       <td>
         <select name="section_id">
           <% for (int section_id: section_ids) { %>
@@ -136,10 +142,25 @@ function checkInsert() {
           <% } %>
         </select>
       </td>
-      <td><input type="text" name="date" size="12" id="date_insert" onkeyup="checkInsert()"></td>
+
+      <td>
+        <select name="type">
+          <option value="LE">LE</option>
+          <option value="DI">DI</option>
+          <option value="LAB">LAB</option>
+        </select>
+      </td>
+
+      <td><input type="text" name="days" size="12" id="days_insert" onkeyup="checkInsert()"></td>
       <td><input type="text" name="time" size="12" id="time_insert" onkeyup="checkInsert()"></td>
       <td><input type="text" name="room_id" size="12" id="room_id_insert" onkeyup="checkInsert()"></td>
-      <td><input type="submit" value="Insert" id="insert_button" disabled></td>
+      <td>
+        <select name="mandatory">
+          <option value="yes">yes</option>
+          <option value="no">no</option>
+        </select>
+      </td>
+      <td><input type="submit" value="Insert" id="insert_button"></td>
     </form>
   </tr>
 
@@ -147,9 +168,11 @@ function checkInsert() {
   while (rs.next()) { 
     int rowN = rs.getRow();  // for JS checker to identify each row in the table
     int section_id = rs.getInt("section_id");
-    String date = rs.getString("date");
+    String type = rs.getString("type");
+    String days = rs.getString("days");
     String time = rs.getString("time");
     String room_id = rs.getString("room_id");
+    String mandatory = rs.getString("mandatory");
 %>
 
 <%-- JS to validify form inputs before updating each row --%>
@@ -177,23 +200,31 @@ function checkUpdate(row) {
 
 <%-- New: presenting the rows with edit/delete --%>
 <tr>
-  <form action="review_sessions.jsp" method="get">         
+  <form action="meetings.jsp" method="get">         
     <input type="hidden" name="action" value="update">
     <input type="hidden" name="section_id" value="<%= section_id %>">
-    <input type="hidden" name="date" value="<%= date %>">
-    <input type="hidden" name="time" value="<%= time %>">
+    <input type="hidden" name="type" value="<%= type %>">
     <td><input type="number" class="<%= rowN%>" name="section_id" size="12" value="<%= section_id %>" readonly onkeyup="checkUpdate(<%= rowN%>)"></td>
-    <td><input type="text" class="<%= rowN%>" name="date" size="12" value="<%= date %>" readonly onkeyup="checkUpdate(<%= rowN%>)"></td>
+    
+    <td>
+      <select name="type" onchange="checkUpdate(<%= rowN%>)">
+        <option value="LE" <%= (type.equals("LE")) ? "selected" : "" %>>LE</option>
+        <option value="DI" <%= (type.equals("DI")) ? "selected" : "" %>>DI</option>
+        <option value="LAB" <%= (type.equals("LAB")) ? "selected" : "" %>>LAB</option>
+      </select>
+    </td>
+    
+    <td><input type="text" class="<%= rowN%>" name="days" size="12" value="<%= days %>" readonly onkeyup="checkUpdate(<%= rowN%>)"></td>
     <td><input type="text" class="<%= rowN%>" name="time" size="12" value="<%= time %>" onkeyup="checkUpdate(<%= rowN%>)"></td>
     <td><input type="text" class="<%= rowN%>" name="room_id" size="12" value="<%= room_id %>" onkeyup="checkUpdate(<%= rowN%>)"></td>
+    <td><input type="text" class="<%= rowN%>" name="mandatory" size="12" value="<%= mandatory %>" onkeyup="checkUpdate(<%= rowN%>)"></td>
     <td><input type="submit" id="update_button_<%= rowN%>" value="Update" disabled></td>
   </form>
   
-  <form action="review_sessions.jsp" method="get">         
+  <form action="meetings.jsp" method="get">         
     <input type="hidden" name="action" value="delete">
     <input type="hidden" name="section_id" value="<%= section_id %>">
-    <input type="hidden" name="date" value="<%= date %>">
-    <input type="hidden" name="time" value="<%= time %>">
+    <input type="hidden" name="type" value="<%= type %>">
     <td><input type="submit" value="Delete"></td>
   </form>
 </tr>
@@ -224,3 +255,4 @@ function checkUpdate(row) {
   }
 
 %>
+

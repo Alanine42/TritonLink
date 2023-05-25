@@ -198,18 +198,6 @@ function checkUpdate(row) {
   </form>
 </tr>
 
-
-<%-- Old: just presenting the rows (No edit/delete) --%>
-  <%-- <tr>
-    <td><%= section ID %></td>
-    <td><%= course ID %></td>
-    <td><%= quarter %></td>
-    <td><%= title %></td>
-    <td><%= faculty name %></td>
-    <td><%= avaliable seats %></td>
-    <td><%= total seats %></td>
-  </tr> --%>
-
 <%
   }
 %>
