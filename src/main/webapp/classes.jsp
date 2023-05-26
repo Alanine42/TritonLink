@@ -32,7 +32,7 @@
       conn.setAutoCommit(false);
       
       PreparedStatement pstmt = conn.prepareStatement(
-          "insert into classes (course_id, quarter, title, faculty_name, available_seats, total_seats) values (?,?,?,?,?,?);");
+          "insert into classes (course_id, quarter, title, faculty_name, available_seats, total_seats) values (?,?,?,?,?,?)");
       
       pstmt.setString(1, _course_id);
       pstmt.setString(2, _quarter);
