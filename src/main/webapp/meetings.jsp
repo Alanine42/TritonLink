@@ -21,8 +21,9 @@
       _section_id = Integer.parseInt(request.getParameter("section_id"));
     }
     String _type = request.getParameter("type");
-    String _days = request.getParameter("days");
-    String _time = request.getParameter("time");
+    String _day = request.getParameter("day");
+    String _start_time = request.getParameter("start_time");
+    String _end_time = request.getParameter("end_time");
     String _room_id = request.getParameter("room_id");
     String _mandatory = request.getParameter("mandatory");
 
@@ -33,14 +34,15 @@
       conn.setAutoCommit(false);
       
       PreparedStatement pstmt = conn.prepareStatement(
-          "insert into meetings values (?, ?, ?, ?, ?, ?)");
+          "insert into meetings values (?, ?, ?, ?, ?, ?, ?)");
       
       pstmt.setInt(1, _section_id);
       pstmt.setString(2, _type);
-      pstmt.setString(3, _days);
-      pstmt.setString(4, _time);
+      pstmt.setString(3, _day);
+      pstmt.setString(4, _start_time);
       pstmt.setString(5, _room_id);
       pstmt.setString(6, _mandatory);
+      pstmt.setString(7, _end_time);
 
       pstmt.executeUpdate();
       conn.commit();
@@ -52,14 +54,15 @@
       conn.setAutoCommit(false);
 
       PreparedStatement pstmt = conn.prepareStatement(
-          "update meetings set days=?, time=?, room_id=?, mandatory=? where section_id=? and type=?");
+          "update meetings set start_time=?, end_time=?, room_id=?, mandatory=? where section_id=? and type=? and day=?");
       
-      pstmt.setString(1, _days);
-      pstmt.setString(2, _time);
+      pstmt.setString(1, _start_time);
+      pstmt.setString(2, _end_time);
       pstmt.setString(3, _room_id);
       pstmt.setString(4, _mandatory);
       pstmt.setInt(5, _section_id);
       pstmt.setString(6, _type);
+      pstmt.setString(7, _day);
       
       int rowCount = pstmt.executeUpdate();   // returns # of rows effected
       conn.commit();
@@ -71,7 +74,7 @@
       conn.setAutoCommit(false);
 
       PreparedStatement pstmt = conn.prepareStatement(
-          "delete from meetings where section_id=?, type=?");
+          "delete from meetings where section_id=? and type=?");
 
       pstmt.setInt(1, _section_id);
       pstmt.setString(2, _type);
@@ -106,13 +109,13 @@
 <%-- JS (rocks!) to validify form inputs before insertion  --%>
 <script>
 function checkInsert() {
-  var days_insert = document.getElementById("days_insert");
   var time_insert = document.getElementById("time_insert");
+  var time_insert2 = document.getElementById("time_insert2");
   var room_id_insert = document.getElementById("room_id_insert");
 
   var insertButton = document.getElementById("insert_button");
   
-  if (date_insert.value == "" || time_insert.value == "" || room_id_insert.value == "") {
+  if (time_insert.value == "" || time_insert2.value == "" || room_id_insert.value == "") {
     insertButton.disabled = true;
     //insertButton.style.opacity = "0.5"; // dim the button
   } else {
@@ -126,8 +129,9 @@ function checkInsert() {
   <tr>
     <th>section ID</th>
     <th>type</th>
-    <th>days</th>
-    <th>time</th>
+    <th>day</th>
+    <th>start time</th>
+    <th>end time</th>
     <th>room ID</th>
     <th>mandatory</th>
   </tr>
@@ -151,8 +155,18 @@ function checkInsert() {
         </select>
       </td>
 
-      <td><input type="text" name="days" size="12" id="days_insert" onkeyup="checkInsert()"></td>
-      <td><input type="text" name="time" size="12" id="time_insert" onkeyup="checkInsert()"></td>
+      <%-- <td><input type="text" name="day" size="12" id="day_insert" onkeyup="checkInsert()"></td> --%>
+      <td>
+        <select name="day">
+          <option value="M">M</option>
+          <option value="Tu">Tu</option>
+          <option value="W">W</option>
+          <option value="Th">Th</option>
+          <option value="F">F</option>
+        </select>
+      </td>
+      <td><input type="text" name="start_time" size="12" id="time_insert" onkeyup="checkInsert()"></td>
+      <td><input type="text" name="end_time" size="12" id="time_insert2" onkeyup="checkInsert()"></td>
       <td><input type="text" name="room_id" size="12" id="room_id_insert" onkeyup="checkInsert()"></td>
       <td>
         <select name="mandatory">
@@ -169,8 +183,9 @@ function checkInsert() {
     int rowN = rs.getRow();  // for JS checker to identify each row in the table
     int section_id = rs.getInt("section_id");
     String type = rs.getString("type");
-    String days = rs.getString("days");
-    String time = rs.getString("time");
+    String day = rs.getString("day");
+    String start_time = rs.getString("start_time");
+    String end_time = rs.getString("end_time");
     String room_id = rs.getString("room_id");
     String mandatory = rs.getString("mandatory");
 %>
@@ -214,8 +229,18 @@ function checkUpdate(row) {
       </select>
     </td>
     
-    <td><input type="text" class="<%= rowN%>" name="days" size="12" value="<%= days %>" readonly onkeyup="checkUpdate(<%= rowN%>)"></td>
-    <td><input type="text" class="<%= rowN%>" name="time" size="12" value="<%= time %>" onkeyup="checkUpdate(<%= rowN%>)"></td>
+    <%-- <td><input type="text" class="<%= rowN%>" name="day" size="12" value="<%= day %>" readonly onkeyup="checkUpdate(<%= rowN%>)"></td> --%>
+    <td>
+        <select name="day" onkeyup="checkUpdate(<%= rowN%>)">
+          <option value="M">M</option>
+          <option value="Tu">Tu</option>
+          <option value="W">W</option>
+          <option value="Th">Th</option>
+          <option value="F">F</option>
+        </select>
+      </td>
+    <td><input type="text" class="<%= rowN%>" name="start_time" size="12" value="<%= start_time %>" onkeyup="checkUpdate(<%= rowN%>)"></td>
+    <td><input type="text" class="<%= rowN%>" name="end_time" size="12" value="<%= end_time %>" onkeyup="checkUpdate(<%= rowN%>)"></td>
     <td><input type="text" class="<%= rowN%>" name="room_id" size="12" value="<%= room_id %>" onkeyup="checkUpdate(<%= rowN%>)"></td>
     <td><input type="text" class="<%= rowN%>" name="mandatory" size="12" value="<%= mandatory %>" onkeyup="checkUpdate(<%= rowN%>)"></td>
     <td><input type="submit" id="update_button_<%= rowN%>" value="Update" disabled></td>
@@ -247,11 +272,11 @@ function checkUpdate(row) {
   } 
   catch (SQLException e) {
     out.println(e.getMessage());
-    out.println("<br><br><h1>Please click on the brower's back button</h1><br>");
+    out.println("<br><br><h1>Please click on the browser's back button</h1><br>");
   }
   catch (Exception e) {
     out.println(e.getMessage());
-    out.println("<br><br><h1>Please click on the brower's back button</h1><br>");
+    out.println("<br><br><h1>Please click on the browser's back button</h1><br>");
   }
 
 %>

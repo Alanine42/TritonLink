@@ -15,6 +15,7 @@
 <%-- <br><code> Insertion, Update, Delete </code> --%>
 <%
     // Get all the parameters from the form, enforce the non-null's
+    String _degree = request.getParameter("degree");
     String _concentration = request.getParameter("concentration");
     int _min_units = 0;
     if (request.getParameter("min_units") != null) {
@@ -28,10 +29,11 @@
       conn.setAutoCommit(false);
 
       PreparedStatement pstmt = conn.prepareStatement(
-          "insert into ms_requirement values (?, ?)");
+          "insert into ms_requirement values (?, ?, ?)");
       
-      pstmt.setString(1, _concentration);
-      pstmt.setInt(2, _min_units);
+      pstmt.setString(1, _degree);  
+      pstmt.setString(2, _concentration);
+      pstmt.setInt(3, _min_units);
       
       pstmt.executeUpdate();
       conn.commit();
@@ -43,10 +45,11 @@
       conn.setAutoCommit(false);
 
       PreparedStatement pstmt = conn.prepareStatement(
-          "update ms_requirement set min_units=? where concentration=?");
+          "update ms_requirement set min_units=? where degree=? and concentration=?");
       
       pstmt.setInt(1, _min_units);
-      pstmt.setString(2, _concentration);     // fill in the student_id wildcard
+      pstmt.setString(2, _degree);     
+      pstmt.setString(3, _concentration);     
       
       int rowCount = pstmt.executeUpdate();   // returns # of rows effected
       conn.commit();
@@ -58,9 +61,10 @@
       conn.setAutoCommit(false);
 
       PreparedStatement pstmt = conn.prepareStatement(
-          "delete from ms_requirement where concentration=?");
+          "delete from ms_requirement where degree=? and concentration=?");
 
-      pstmt.setString(1, _concentration);
+      pstmt.setString(1, _degree);    
+      pstmt.setString(2, _concentration);
 
       int rowCount = pstmt.executeUpdate();   // returns # of rows effected
       conn.commit();
@@ -75,19 +79,20 @@
 <%-- <br><code>Statement code</code> --%>
 <%
     Statement stmt = conn.createStatement();
-    ResultSet rs = stmt.executeQuery("select * from ms_requirement order by concentration");
+    ResultSet rs = stmt.executeQuery("select * from ms_requirement order by degree");
 %>
 
 
 <%-- JS (rocks!) to validify form inputs before insertion  --%>
 <script>
 function checkInsert() {
+  var degree_insert = document.getElementById("degree_insert");
   var concentration_insert = document.getElementById("concentration_insert");
   var min_units_insert = document.getElementById("min_units_insert");
 
   var insertButton = document.getElementById("insert_button");
   
-  if (concentration_insert.value == "" || min_units_insert.value == 0) {
+  if (degree_insert.value == "" || concentration_insert.value == "" || min_units_insert.value == 0) {
     insertButton.disabled = true;
     //insertButton.style.opacity = "0.5"; // dim the button
   } else {
@@ -99,6 +104,7 @@ function checkInsert() {
 <%-- <br><code>Presentation & Insertion </code> --%>
 <table>
   <tr>
+    <th>degree</th>
     <th>concentration</th>
     <th>min units</th>
   </tr>
@@ -106,6 +112,7 @@ function checkInsert() {
   <tr>
     <form action="ms_requirement.jsp" method="get">         
       <input type="hidden" name="action" value="insert">
+      <td><input type="text" name="degree" size="12" id="degree_insert" onkeyup="checkInsert()"></td>
       <td><input type="text" name="concentration" size="12" id="concentration_insert" onkeyup="checkInsert()"></td>
       <td><input type="number" name="min_units" size="12" id="min_units_insert" onkeyup="checkInsert()" value="0"></td>
       <td><input type="submit" value="Insert" id="insert_button" disabled></td>
@@ -115,6 +122,7 @@ function checkInsert() {
 <% 
   while (rs.next()) { 
     int rowN = rs.getRow();  // for JS checker to identify each row in the table
+    String degree = rs.getString("degree");
     String concentration = rs.getString("concentration");
     int min_units = rs.getInt("min_units");
 %>
@@ -146,7 +154,9 @@ function checkUpdate(row) {
 <tr>
   <form action="ms_requirement.jsp" method="get">         
     <input type="hidden" name="action" value="update">
+    <input type="hidden" name="degree" value="<%= degree %>">
     <input type="hidden" name="concentration" value="<%= concentration %>">
+    <td><input type="text" class="<%= rowN%>" name="degree" size="12" value="<%= degree %>" onkeyup="checkUpdate(<%= rowN%>)"></td>
     <td><input type="text" class="<%= rowN%>" name="concentration" size="12" value="<%= concentration %>" onkeyup="checkUpdate(<%= rowN%>)"></td>
     <td><input type="number" class="<%= rowN%>" name="min_units" size="12" value="<%= min_units %>" onkeyup="checkUpdate(<%= rowN%>)"></td>
     <td><input type="submit" id="update_button_<%= rowN%>" value="Update" disabled></td>
@@ -155,19 +165,10 @@ function checkUpdate(row) {
   <form action="ms_requirement.jsp" method="get">         
     <input type="hidden" name="action" value="delete">
     <td><input type="hidden" name="concentration" value="<%= concentration %>"></td>
+    <td><input type="hidden" name="degree" value="<%= degree %>"></td>
     <td><input type="submit" value="Delete"></td>
   </form>
 </tr>
-
-
-<%-- Old: just presenting the rows (No edit/delete) --%>
-  <%-- <tr>
-    <td><%= req_id %></td>
-    <td><%= degree %></td>
-    <td><%= course_type %></td>
-    <td><%= min_units %></td>
-  </tr> --%>
-  
 <%
   }
 %>
@@ -185,11 +186,11 @@ function checkUpdate(row) {
   } 
   catch (SQLException e) {
     out.println(e.getMessage());
-    out.println("<br><br><h1>Please click on the brower's back button</h1><br>");
+    out.println("<br><br><h1>Please click on the browser's back button</h1><br>");
   }
   catch (Exception e) {
     out.println(e.getMessage());
-    out.println("<br><br><h1>Please click on the brower's back button</h1><br>");
+    out.println("<br><br><h1>Please click on the browser's back button</h1><br>");
   }
 
 %>

@@ -244,13 +244,13 @@ function checkUpdate(row) {
   } 
   catch (SQLException e) {
     out.println(e.getMessage());
-    out.println("<br><br><h1>Please click on the brower's back button</h1><br>");
+    out.println("<br><br><h1>Please click on the browser's back button</h1><br>");
 
     // Triggers constraint ()
   }
   catch (Exception e) {
     out.println(e.getMessage());
-    out.println("<br><br><h1>Please click on the brower's back button</h1><br>");
+    out.println("<br><br><h1>Please click on the browser's back button</h1><br>");
   }
 
 %>

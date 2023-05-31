@@ -167,7 +167,7 @@ function checkInsert() {
         <option value="NP">NP</option>
         <option value="S">S</option>
         <option value="U">U</option>
-        <option value="I">I</option>
+        <option value="IN">I</option>
         <option value="W">W</option>
         <option value="X">X</option>
         </select>
@@ -234,7 +234,7 @@ function checkUpdate(row) {
           <option value="NP" <%= grade.equals("NP") ? "selected" : "" %>>NP</option>
           <option value="S" <%= grade.equals("S") ? "selected" : "" %>>S</option>
           <option value="U" <%= grade.equals("U") ? "selected" : "" %>>U</option>
-          <option value="I" <%= grade.equals("I") ? "selected" : "" %>>I</option>
+          <option value="IN" <%= grade.equals("IN") ? "selected" : "" %>>I</option>
           <option value="W" <%= grade.equals("W") ? "selected" : "" %>>W</option>
           <option value="X" <%= grade.equals("X") ? "selected" : "" %>>X</option>
         </select>
@@ -280,11 +280,11 @@ function checkUpdate(row) {
   } 
   catch (SQLException e) {
     out.println(e.getMessage());
-    out.println("<br><br><h1>Please click on the brower's back button</h1><br>");
+    out.println("<br><br><h1>Please click on the browser's back button</h1><br>");
   }
   catch (Exception e) {
     out.println(e.getMessage());
-    out.println("<br><br><h1>Please click on the brower's back button</h1><br>");
+    out.println("<br><br><h1>Please click on the browser's back button</h1><br>");
   }
 
 %>

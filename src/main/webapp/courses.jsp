@@ -20,6 +20,7 @@
     String _course_id = request.getParameter("course_id");
     String _department = request.getParameter("department");
     String _prereqs = request.getParameter("prereqs");
+    String _req_ids = request.getParameter("req_ids");
     String _grade_options = request.getParameter("grade_options");
     String _course_level = request.getParameter("course_level");
     int _unit_low = request.getParameter("unit_low")==null ? 4 : Integer.parseInt(request.getParameter("unit_low"));
@@ -32,16 +33,17 @@
       conn.setAutoCommit(false);
 
       PreparedStatement pstmt = conn.prepareStatement(
-          "insert into courses values (?, ?, NULL, ?, ?, ?, ?, ?)");
+          "insert into courses values (?, ?, ?, ?, ?, ?, ?, ?)");
       
       pstmt.setString(1, _course_id);
       pstmt.setString(2, _department);
       pstmt.setString(3, _prereqs);
-      pstmt.setString(4, _grade_options);
-      pstmt.setString(5, _course_level);
-      pstmt.setInt(6, _unit_low);
-      pstmt.setInt(7, _unit_high);
-  
+      pstmt.setString(4, _req_ids);
+      pstmt.setString(5, _grade_options);
+      pstmt.setString(6, _course_level);
+      pstmt.setInt(7, _unit_low);
+      pstmt.setInt(8, _unit_high);
+
       pstmt.executeUpdate();
       conn.commit();
       conn.setAutoCommit(true);
@@ -52,16 +54,17 @@
       conn.setAutoCommit(false);
 
       PreparedStatement pstmt = conn.prepareStatement(
-          "update courses set department=?, prereqs=?, grade_options=?, course_level=?, unit_low=?, unit_high=? where course_id=?");
+          "update courses set department=?, prereqs=?, req_ids=?, grade_options=?, course_level=?, unit_low=?, unit_high=? where course_id=?");
       
       pstmt.setString(1, _department);
       pstmt.setString(2, _prereqs);
-      pstmt.setString(3, _grade_options);
-      pstmt.setString(4, _course_level);
-      pstmt.setInt(5, _unit_low);
-      pstmt.setInt(6, _unit_high);
-      pstmt.setString(7, _course_id);
-
+      pstmt.setString(3, _req_ids);
+      pstmt.setString(4, _grade_options);
+      pstmt.setString(5, _course_level);
+      pstmt.setInt(6, _unit_low);
+      pstmt.setInt(7, _unit_high);
+      pstmt.setString(8, _course_id);
+      
       int rowCount = pstmt.executeUpdate();   // returns # of rows effected
       conn.commit();
       conn.setAutoCommit(true);
@@ -126,6 +129,7 @@ function checkInsert() {
     <th>CourseID</th>
     <th>Department</th>
     <th>Prereqs</th>
+    <th>Req IDs</th>
     <th>Grade Options</th>
     <th>Course Level</th>
     <th>Units Range</th>
@@ -145,6 +149,7 @@ function checkInsert() {
         </select>
       </td>
       <td><input type="text" name="prereqs" size="16"></td>
+      <td><input type="text" name="req_ids" size="10"></td>
       <td>
         <select name="grade_options">
           <option value="Letter">Letter only</option>
@@ -173,6 +178,7 @@ function checkInsert() {
     String course_id = rs.getString("course_id");
     String department = rs.getString("department");
     String prereqs = rs.getString("prereqs");
+    String req_ids = rs.getString("req_ids");
     String grade_options = rs.getString("grade_options");
     String course_level = rs.getString("course_level");
     int unit_low = rs.getInt("unit_low");
@@ -193,6 +199,7 @@ function checkInsert() {
       </select>
     </td>
     <td><input type="text" name="prereqs" value="<%= prereqs %>" size="16"></td>
+    <td><input type="text" name="req_ids" value="<%= req_ids %>" size="10"></td>
     <td>
       <select name="grade_options" onchange="checkUpdate(<%= rowN%>)">
         <option value="Letter" <%= (grade_options.equals("Letter")) ? "selected" : "" %>>Letter only</option>
