@@ -126,6 +126,7 @@
 </table>
 
 <%
+    // Get each concentration's fulfilled units
     PreparedStatement pstmt_req = conn.prepareStatement("select req_id, unit from classes_taken ct join classes c on ct.section_id = c.section_id join fulfillment f on f.course_id = c.course_id join grade_conversion g on grade = g.letter_grade where ct.student_id = ? and g.number_grade > ? and req_id in (select concentration from ms_requirement where degree = ?)");
     pstmt_req.setString(1, _student_id);
     pstmt_req.setDouble(2, _min_gpa);
@@ -164,7 +165,7 @@
   pstmt_remain.setString(2, _student_id);
   ResultSet rs_remain = pstmt_remain.executeQuery();
 %>
-<br><h3>courses not yet taken, and their next offering quarter</h3>
+<br><h3>Courses not yet taken, and their next offering quarter</h3>
 <table>
   <tr>
     <th>Concentration</th>

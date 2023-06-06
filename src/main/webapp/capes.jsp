@@ -118,7 +118,7 @@
 <%
         }
 
-        PreparedStatement pstmt2 = conn.prepareStatement("select avg(number_grade) from CPG a join grade_conversion b on a.grade = b.letter_grade where course_id =? and faculty_name = ?");
+        PreparedStatement pstmt2 = conn.prepareStatement("select avg(number_grade) from CPG a join grade_conversion b on a.grade = b.letter_grade where b.number_grade > 0 and course_id =? and faculty_name = ?");
         pstmt2.setString(1, course);
         pstmt2.setString(2, prof);
 
