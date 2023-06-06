@@ -68,23 +68,6 @@
 
 %>
 
-<script>
-function checkInsert() {
-  let courseIdInsert = document.getElementById("course_id_insert");
-  let reqIdInsert = document.getElementById("req_id_insert");
-  var insertButton = document.getElementById("insert_button");
-  
-  if (courseIdInsert.value == "" || reqIdInsert.value == "") {
-    insertButton.disabled = true;
-    //insertButton.style.opacity = "0.5"; // dim the button
-  } else {
-    insertButton.disabled = false;
-    //insertButton.style.opacity = "1"; // reset the button opacity
-  }
-}
-</script>
-
-
 <table>
   <tr>
     <th>Course ID</th>
@@ -103,7 +86,7 @@ function checkInsert() {
       </td>
       <td><input type="text" name="req_id" id="req_id_insert" size="16"></td>
       
-      <td><input type="submit" value="Insert" id="insert_button" disabled></td>
+      <td><input type="submit" value="Insert" id="insert_button" ></td>
     </form>
   </tr>
 
@@ -119,7 +102,7 @@ function checkInsert() {
   <td><%= course_id %></td>
   <td><%= req_id %></td>
   
-  <form action="fulfillment.jsp" method="get">         
+  <form action="fulfillment.jsp" method="post">         
     <input type="hidden" name="action" value="delete">
     <input type="hidden" name="course_id" value="<%= course_id %>">
     <input type="hidden" name="req_id" value="<%= req_id %>">
@@ -142,14 +125,15 @@ function checkInsert() {
     rs.close();
     rs_courses.close();
     stmt.close();
+    stmt_courses.close();
     conn.close();
   } 
   catch (SQLException e) {
-    out.println(e.getMessage());
+    out.println(e);
     out.println("<br><br><h1>Please click on the browser's back button</h1><br>");
   }
   catch (Exception e) {
-    out.println(e.getMessage());
+    out.println(e);
     out.println("<br><br><h1>Please click on the browser's back button</h1><br>");
   }
 

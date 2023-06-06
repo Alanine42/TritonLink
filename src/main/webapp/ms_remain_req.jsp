@@ -96,79 +96,89 @@
 <%
     // For the selected concentration, display their min_units attributes
     String _degree = request.getParameter("degree");
+    Double _min_gpa = 0.0;
+    if (request.getParameter("min_gpa") != null && !request.getParameter("min_gpa").isEmpty()) {
+      _min_gpa = Double.parseDouble(request.getParameter("min_gpa"));
+    }
     PreparedStatement pstmt_type = conn.prepareStatement("select concentration, min_units from ms_requirement where degree=?");
     pstmt_type.setString(1, _degree);
     ResultSet rs_type = pstmt_type.executeQuery();
 
-    String concentration = "";
-    int _min_unit = 0;
     int total_unit = 0;
 
-    ArrayList<String> concentrations = new ArrayList<String>();
-    ArrayList<Integer> rem_units = new ArrayList<Integer>();
+    HashMap<String, Integer> rem_units_map = new HashMap<String, Integer>();  // concentration: rem_units
+
 
     while (rs_type.next()) {
-        concentration = rs_type.getString("concentration");
-        _min_unit = rs_type.getInt("min_units");
+        String concentration = rs_type.getString("concentration");
+        int _min_unit = rs_type.getInt("min_units");
         total_unit += _min_unit;
-        concentrations.add(concentration);
-        rem_units.add(_min_unit);
+        rem_units_map.put(concentration, _min_unit);
     
-%>
-  <tr>
-    <td><%= concentration %></td>
-    <td><%= _min_unit %></td>
-  </tr>
+    %>
+      <tr>
+        <td><%= concentration %></td>
+        <td><%= _min_unit %></td>
+      </tr>
 
   <% } %>
 
 </table>
 
 <%
-    Double _min_gpa = Double.parseDouble(request.getParameter("min_gpa"));
-    PreparedStatement pstmt_req = conn.prepareStatement("select req_id, unit from classes_taken ct join classes c on ct.section_id = c.section_id join fulfillment f on f.course_id = c.course_id join grade_conversion g on grade = g.letter_grade where ct.student_id = ? and g.number_grade > ?");
+    PreparedStatement pstmt_req = conn.prepareStatement("select req_id, unit from classes_taken ct join classes c on ct.section_id = c.section_id join fulfillment f on f.course_id = c.course_id join grade_conversion g on grade = g.letter_grade where ct.student_id = ? and g.number_grade > ? and req_id in (select concentration from ms_requirement where degree = ?)");
     pstmt_req.setString(1, _student_id);
     pstmt_req.setDouble(2, _min_gpa);
+    pstmt_req.setString(3, _degree);
     ResultSet rs_req = pstmt_req.executeQuery();
 
-    String req_id = "";
-    int unit = 0;
+    // Deduct the units of the fulfilled requirements
     while (rs_req.next()) {
-      req_id = rs_req.getString("req_id");
-      unit = rs_req.getInt("unit");
-
-
-        // req_id is the id of a course_tpye(core CS26 etc.) while _req_ids are the ids a class fulfills 
-        // (CSE 132 fulfill core CS26 and elective CS26etc)
-        req_id = rs_req.getString("req_ids");
-        _unit = rs_req.getInt("unit");
-        for(int i = 0; i < concentrations.size(); i++) {
-            // whether this class fulfill a requirement
-            String[] req_id_arr = req_id.split(",");
-            for(String id : req_id_arr) {
-                if(id.equals(concentrations.get(i))) {
-                    rem_units.set(i, rem_units.get(i) - _unit);
-                    total_unit -= _unit;
-                }
-            }
-        }
+      String req_id = rs_req.getString("req_id");
+      int unit = rs_req.getInt("unit");
+      rem_units_map.put(req_id, rem_units_map.get(req_id) - unit);
+      total_unit -= unit;
     }
 
 %>
 
-<br><p>remainning unit is "<%= total_unit %>"</p><br>
+<br><p>remaining unit is "<%= total_unit %>"</p><br>
 
 <div>
-  <% for(int i = 0; i < concentrations.size(); i++){ %>
+  <% for (String concentration : rem_units_map.keySet()){ %>
   <p>
-    <%= concentrations.get(i) %> has <%= rem_units.get(i) %> units remaining,
-    <% if(rem_units.get(i) <= 0) { %>
+    <%= concentration %> has <%= rem_units_map.get(concentration) %> units remaining,
+    <% if(rem_units_map.get(concentration) <= 0) { %>
       <span style="color: green">Requirement Fulfilled</span>
     <% } %>
   </p>
   <% } %>
   <br>
 </div>
+
+
+<%
+  // Courses not yet taken, and their next offering quarter
+  PreparedStatement pstmt_remain = conn.prepareStatement("select m.concentration, f.course_id, c.quarter as next_time_given from ms_requirement m join fulfillment f on f.req_id = m.concentration join classes c on c.course_id = f.course_id where m.degree = ? and (c.quarter = 'Fall 2018' or CAST(SUBSTRING(c.quarter, LENGTH(c.quarter) - 3) AS INT) > 2018) and f.course_id not in (select co.course_id from classes_taken ct join classes cl on ct.section_id = cl.section_id	join courses co on co.course_id = cl.course_id where ct.student_id = ?)");
+  pstmt_remain.setString(1, _degree);
+  pstmt_remain.setString(2, _student_id);
+  ResultSet rs_remain = pstmt_remain.executeQuery();
+%>
+<br><h3>Courses not yet taken, and their next offering quarter</h3>
+<table>
+  <tr>
+    <th>Concentration</th>
+    <th>Course ID</th>
+    <th>Next Time Given</th>
+  </tr>
+  <% while (rs_remain.next()) { %>
+  <tr>
+    <td><%= rs_remain.getString("concentration") %></td>
+    <td><%= rs_remain.getString("course_id") %></td>
+    <td><%= rs_remain.getString("next_time_given") %></td>
+  </tr>
+  <% } %>
+</table>
 
 <%-- <br><code>Close connection code</code> --%>
 <%
