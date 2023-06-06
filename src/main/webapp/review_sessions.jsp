@@ -11,7 +11,12 @@
     // out.println("Connected to Postgres!");
 // [!] un/comment the line below to get syntax highlighting for below html codes. 
       //}
+
+
 %>  
+
+<h3>The Review Sessions can only be between 08:00 to 20:00</h3>
+<p> All attributes except roomID are primary keys. Thus if you want to modify the time of any review session, delete it and insert a new one. </p>
 
 <%-- <br><code> Insertion, Update, Delete </code> --%>
 <%
@@ -110,12 +115,47 @@
 <script>
 function checkInsert() {
   var date_insert = document.getElementById("date_insert");
-  var time_insert = document.getElementById("time_insert");
   var room_id_insert = document.getElementById("room_id_insert");
-
+  var start_insert = document.getElementById("start_insert");
+  var end_insert = document.getElementById("end_insert");
   var insertButton = document.getElementById("insert_button");
+
+  let [start_hour, start_minute] = start_insert.value.split(":");
+  let [end_hour, end_minute] = end_insert.value.split(":");
+  start_hour = parseInt(start_hour);
+  end_hour = parseInt(end_hour);
   
-  if (date_insert.value == "" || time_insert.value == "" || room_id_insert.value == "") {
+  if (start_minute != "00" ){
+    start_hour += 1;
+  }
+  if (end_minute != "00"){
+    end_hour += 1;
+  }
+
+  start_minute = parseInt(start_minute);
+  end_minute = parseInt(end_minute);
+
+  if (start_hour < 8 || start_hour > 20 || end_hour < 8 || end_hour > 20) {
+    alert("The Review Sessions can only be between 08:00 to 20:00");
+    start_insert.value = "";
+    end_insert.value = "";
+  }
+  if (start_hour > end_hour){
+    alert("The start time cannot be later than the end time");
+    start_insert.value = "";
+    end_insert.value = "";
+  }
+  elif (start_hour == end_hour){
+    if (start_minute > end_minute){
+      alert("The start time cannot be later than the end time");
+      start_insert.value = "";
+      end_insert.value = "";
+    }
+  }
+
+
+  
+  if (date_insert.value == "" || start_insert.value == "" || room_id_insert.value == "" || end_insert.value == "") {
     insertButton.disabled = true;
     //insertButton.style.opacity = "0.5"; // dim the button
   } else {
@@ -156,8 +196,8 @@ function checkInsert() {
           <option value="F">F</option>
         </select>
       </td>
-      <td><input type="text" name="start_time" size="12" id="time_insert" onkeyup="checkInsert()"></td>
-      <td><input type="text" name="end_time" size="12" id="time_insert2" onkeyup="checkInsert()"></td>
+      <td><input type="text" name="start_time" size="12" id="start_insert" onkeyup="checkInsert()"></td>
+      <td><input type="text" name="end_time" size="12" id="end_insert" onkeyup="checkInsert()"></td>
       <td><input type="text" name="room_id" size="12" id="room_id_insert" onkeyup="checkInsert()"></td>
       <td><input type="submit" value="Insert" id="insert_button" disabled></td>
     </form>

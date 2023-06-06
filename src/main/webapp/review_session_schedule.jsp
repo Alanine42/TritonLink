@@ -54,7 +54,7 @@
     String end_time = "";
     String start_time_hour = "";
     String[] end_time_arr = new String[2];
-    PreparedStatement pstmt_meet = conn.prepareStatement("select distinct day, start_time, end_time from meetings where section_id in (select distinct section_id from course_enrollment where student_id not in (select distinct student_id from classes where section_id=?))");
+    PreparedStatement pstmt_meet = conn.prepareStatement("select distinct all_meetings.day, all_meetings.start_time, all_meetings.end_time from (select section_id, day, start_time, end_time from review_sessions union select section_id, day, start_time, end_time from meetings) as all_meetings where section_id in (select distinct section_id from course_enrollment where student_id in  (select distinct student_id from classes where section_id=?))");
     
     boolean[] monday = new boolean[12];
     boolean[] tuesday = new boolean[12];
@@ -93,40 +93,6 @@
             }
         }
     }
-
-    PreparedStatement pstmt_review = conn.prepareStatement("select distinct day, start_time, end_time from review_sessions where section_id in (select distinct section_id from course_enrollment where student_id not in (select distinct student_id from classes where section_id=?))");
-    pstmt_review.setInt(1, section);
-    ResultSet rs_review = pstmt_review.executeQuery();
-    while (rs_review.next()) {
-        day = rs_review.getString("day");
-        start_time = rs_review.getString("start_time");
-        end_time = rs_review.getString("end_time");
-        start_time_hour = start_time.split(":")[0];
-        int start_time_int = Integer.parseInt(start_time_hour);
-        end_time_arr = end_time.split(":");
-        int end_time_int = Integer.parseInt(end_time_arr[0]);
-        if(!(end_time_arr[1].equals("00"))){
-            end_time_int += 1;
-        }
-        for (int i = start_time_int; i < end_time_int; i++){
-            if (day.equals("M")){
-                monday[i - 8] = true;
-            }
-            else if (day.equals("Tu")){
-                tuesday[i - 8] = true;
-            }
-            else if (day.equals("W")){
-                wednesday[i - 8] = true;
-            }
-            else if (day.equals("Th")){
-                thursday[i - 8] = true;
-            }
-            else if (day.equals("F")){
-                friday[i - 8] = true;
-            }
-        }
-    }
-
 
 %>  
     <p>Section: <%= section %></p><br>
@@ -190,7 +156,7 @@
     out.println(e);
   }
   catch (Exception e) {
-    out.println(e);
+    out.println(e.getStackTrace()[0]);
   }
 
 %>

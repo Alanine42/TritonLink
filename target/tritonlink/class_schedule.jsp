@@ -30,7 +30,7 @@
         <option value="<%= ssn %>"><%= ssn %></option>
       <% } %>
     </select>
-  <input type="submit" value="Get classes currently taking by this student">
+  <input type="submit" value="Get classes currently taking by this student and Other conflicting classes">
 </form>
 
 
@@ -87,7 +87,7 @@
 
 %>
 
-<h2>Your current courses | <span style="color: red;">Other Conflicting Courses you cannot take</span></h2>
+<h2>Your current classes | <span style="color: red;">Other Conflicting classes you cannot take</span></h2>
 <table>
   <tr>
     <th>Course ID</th>

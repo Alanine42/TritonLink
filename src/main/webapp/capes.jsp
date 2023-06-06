@@ -33,7 +33,7 @@
 
     // Fetch all quarters
     Statement stmt_quarter = conn.createStatement();
-    ResultSet rs_quarter = stmt_quarter.executeQuery("select distinct quarter from classes order by quarter");
+    ResultSet rs_quarter = stmt_quarter.executeQuery("select distinct quarter from classes where quarter <> 'Spring 2018' order by quarter");
     ArrayList<String> quarters = new ArrayList<String>();
     while (rs_quarter.next()) {
         quarters.add(rs_quarter.getString("quarter"));
@@ -70,50 +70,95 @@
 <%
 
     String course = request.getParameter("course");
-    String prof = request.getParameter("prof");
-    String quarter = request.getParameter("quarter");
+    String prof = request.getParameter("prof")==null ? "all" : request.getParameter("prof");
+    String quarter = request.getParameter("quarter")==null ? "all" : request.getParameter("quarter");
+%>
 
+<p><%= course%> Grade Report at <%= quarter%> For Professor <%= prof %> </p><br>
+
+<%
     if (quarter.equals("all")) {
       if (prof.equals("all")){
         // No. 4
+        Statement stmt = conn.createStatement();
+        stmt.executeUpdate("drop table if exists CPQG CASCADE");
+        stmt.executeUpdate("create table if not exists CPQG as (select c.course_id, c.quarter, c.faculty_name, ct.grade from classes c join classes_taken ct on c.section_id = ct.section_id )");
+
+        PreparedStatement pstmt = conn.prepareStatement("select grade, count(*) as grade_count from CPQG where course_id = ? group by grade");
+        pstmt.setString(1, course);
+        String grade = "";
+        int grade_count = 0;
+        ResultSet rs = pstmt.executeQuery();
+        while(rs.next()){
+          grade = rs.getString("grade");
+          grade_count = rs.getInt("grade_count");
+%>  
+          <p><%= grade %>: <%= grade_count %></p><br>
+<%
+        }
       }
       else {
         // No. 3 and No. 5
+        Statement stmt2 = conn.createStatement();
+        stmt2.executeUpdate("drop table if exists CPG CASCADE");
+        stmt2.executeUpdate("create table if not exists CPG as (select c.course_id, c.faculty_name, ct.grade from classes c join classes_taken ct on c.section_id = ct.section_id )");
+
+        PreparedStatement pstmt = conn.prepareStatement("select grade, count(*) as grade_count from CPG where course_id = ? and faculty_name = ? group by grade");
+        pstmt.setString(1, course);
+        pstmt.setString(2, prof);
+
+        String grade = "";
+        int grade_count = 0;
+        ResultSet rs = pstmt.executeQuery();
+        while(rs.next()){
+          grade = rs.getString("grade");
+          grade_count = rs.getInt("grade_count");
+%>  
+          <p><%= grade %>: <%= grade_count %></p><br>
+<%
+        }
+
+        PreparedStatement pstmt2 = conn.prepareStatement("select avg(number_grade) from CPG a join grade_conversion b on a.grade = b.letter_grade where course_id =? and faculty_name = ?");
+        pstmt2.setString(1, course);
+        pstmt2.setString(2, prof);
+
+        ResultSet rs2 = pstmt2.executeQuery();
+        double avg = 0.0;
+        if (rs2.next()){
+          avg = rs2.getDouble("avg");
+        }
+
+      %>
+
+      <p> Average Grade: <%= avg %></p><br>
+
+      <%
       }
     }
     else{
       // No. 2
-        Statement stmt = conn.createStatement();
-        stmt.executeQuery("drop table if exists CPQG CASCADE");
+        Statement stmt3 = conn.createStatement();
+        stmt3.executeUpdate("drop table if exists CPQG CASCADE");
+        stmt3.executeUpdate("create table if not exists CPQG as (select c.course_id, c.quarter, c.faculty_name, ct.grade from classes c join classes_taken ct on c.section_id = ct.section_id )");
 
-        PreparedStatement pstmt = conn.prepareStatement("create table if not exists CPQG as (select c.course_id, c.quarter, c.faculty_name, ct.grade from classes c join calsses_taken on c.section_id = ct.section_id where c.course_id = ? and c.faculty_name = ? and c.quarter = ?)");
+        PreparedStatement pstmt = conn.prepareStatement("select grade, count(*) as grade_count from CPQG where course_id = ? and faculty_name = ? and quarter = ? group by grade");
         pstmt.setString(1, course);
         pstmt.setString(2, prof);
         pstmt.setString(3, quarter);
-        pstmt.executeUpdate();
         
         String grade = "";
         int grade_count = 0;
-        PreparedStatement pstmt2 = conn.prepareStatement("select grade, count(*) as grade_count from CPQG group by grade");
-        ResultSet rs2 = pstmt2.executeQuery();
-        while(rs2.next()){
-          grade = rs2.getString("grade");
-          grade_count = rs2.getInt("grade_count");
-%>
+        ResultSet rs = pstmt.executeQuery();
+        while(rs.next()){
+          grade = rs.getString("grade");
+          grade_count = rs.getInt("grade_count");
+%>  
           <p><%= grade %>: <%= grade_count %></p><br>
 <%
         }
-%>
-
-
-<%
-    }
+      }
 
 %>
-
-
-
-
 
 <%-- <br><code>Close connection code</code> --%>
 <%
