@@ -103,7 +103,7 @@
         for(int i = 0; i < 12; i++){
           if (!monday[i]){
       %>
-      <tr>Monday <%= String.valueOf(i + 8)%>:00 - <%= String.valueOf(i + 9)%>:00</tr><br> 
+      <tr>June 4 Monday <%= String.valueOf(i + 8)%>:00 - <%= String.valueOf(i + 9)%>:00</tr><br> 
       <%
           }
         }
@@ -112,7 +112,7 @@
         for(int i = 0; i < 12; i++){
           if (!tuesday[i]){
       %>
-      <tr>Tuesday <%= String.valueOf(i + 8)%>:00 - <%= String.valueOf(i + 9)%>:00</tr><br>
+      <tr>June 5 Tuesday <%= String.valueOf(i + 8)%>:00 - <%= String.valueOf(i + 9)%>:00</tr><br>
       <%
           }
         }
@@ -121,7 +121,7 @@
         for(int i = 0; i < 12; i++){
           if (!wednesday[i]){
       %>
-      <tr>Wednesday <%= String.valueOf(i + 8)%>:00 - <%= String.valueOf(i + 9)%>:00</tr><br>
+      <tr>June 6 Wednesday <%= String.valueOf(i + 8)%>:00 - <%= String.valueOf(i + 9)%>:00</tr><br>
       <%
           }
         }
@@ -130,7 +130,7 @@
         for(int i = 0; i < 12; i++){
           if (!thursday[i]){
       %>
-      <tr>Thursday <%= String.valueOf(i + 8)%>:00 - <%= String.valueOf(i + 9)%>:00</tr><br>
+      <tr>June 7 Thursday <%= String.valueOf(i + 8)%>:00 - <%= String.valueOf(i + 9)%>:00</tr><br>
       <%
           }
         }
@@ -139,7 +139,7 @@
         for(int i = 0; i < 12; i++){
           if (!friday[i]){
       %>
-      <tr>Friday <%= String.valueOf(i + 8)%>:00 - <%= String.valueOf(i + 9)%>:00</tr><br>
+      <tr>June 8 Friday <%= String.valueOf(i + 8)%>:00 - <%= String.valueOf(i + 9)%>:00</tr><br>
       <%
           }
         }

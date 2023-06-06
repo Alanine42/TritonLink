@@ -1,5 +1,7 @@
 <%@ page language="java" import="java.sql.*"  %>
 <%@ page import="java.util.ArrayList" %>
+<%@ page import="java.util.HashMap" %>
+<%@ page import="java.lang.Double" %>
 
 
 <%-- <code>Open connection code</code> --%>
@@ -32,7 +34,7 @@
 <%-- Select one studnet by their SSN --%>
 <form action="ms_remain_req.jsp" method="post">         
     <select name="ssn" id="ssn_insert">
-      <option value="">-- select master student --</option>
+      <option value="">-- master student SSN --</option>
       <% for (String ssn : ssns) { %>
         <option value="<%= ssn %>"><%= ssn %></option>
       <% } %>
@@ -45,6 +47,7 @@
       <% } %>
     </select>
 
+    <input type="number" step="0.1" name="min_gpa" placeholder="min_gpa">
   <input type="submit" value="Get the reamainning graduate requirement of this master">
 </form>
 
@@ -122,14 +125,18 @@
 </table>
 
 <%
-
-    PreparedStatement pstmt_req = conn.prepareStatement("select co.req_ids, ct.unit from courses co, classes cl, classes_taken ct where ct.student_id = ? and ct.section_id = cl.section_id and cl.course_id = co.course_id");
+    Double _min_gpa = Double.parseDouble(request.getParameter("min_gpa"));
+    PreparedStatement pstmt_req = conn.prepareStatement("select req_id, unit from classes_taken ct join classes c on ct.section_id = c.section_id join fulfillment f on f.course_id = c.course_id join grade_conversion g on grade = g.letter_grade where ct.student_id = ? and g.number_grade > ?");
     pstmt_req.setString(1, _student_id);
+    pstmt_req.setDouble(2, _min_gpa);
     ResultSet rs_req = pstmt_req.executeQuery();
 
     String req_id = "";
-    int _unit = 0;
+    int unit = 0;
     while (rs_req.next()) {
+      req_id = rs_req.getString("req_id");
+      unit = rs_req.getInt("unit");
+
 
         // req_id is the id of a course_tpye(core CS26 etc.) while _req_ids are the ids a class fulfills 
         // (CSE 132 fulfill core CS26 and elective CS26etc)

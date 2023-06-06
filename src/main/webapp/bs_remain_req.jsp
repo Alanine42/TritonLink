@@ -118,30 +118,26 @@
 
 <%
 
-    PreparedStatement pstmt_req = conn.prepareStatement("select co.req_ids, ct.unit from courses co, classes cl, classes_taken ct where ct.student_id = ? and ct.section_id = cl.section_id and cl.course_id = co.course_id");
+    PreparedStatement pstmt_req = conn.prepareStatement("select f.req_id, ct.unit from classes cl, classes_taken ct, fulfillment f where ct.student_id = ? and ct.section_id = cl.section_id and cl.course_id = f.course_id");
     pstmt_req.setString(1, _student_id);
     ResultSet rs_req = pstmt_req.executeQuery();
 
-    String _req_ids = "";
-    int _unit = 0;
+    String req_id = "";
+    int unit = 0;
     while (rs_req.next()) {
 
         // req_id is the id of a course_tpye(core CS26 etc.) while _req_ids are the ids a class fulfills 
         // (CSE 132 fulfill core CS26 and elective CS26etc)
-        _req_ids = rs_req.getString("req_ids");
-        _unit = rs_req.getInt("unit");
+        req_id = rs_req.getString("req_id");
+        unit = rs_req.getInt("unit");
         for(int i = 0; i < req_ids.size(); i++) {
             // whether this class fulfill a requirement
-            String[] _req_ids_arr = _req_ids.split(",");
-            for(String id : _req_ids_arr) {
-                if(id.equals(req_ids.get(i))) {
-                    rem_units.set(i, rem_units.get(i) - _unit);
-                    tot_unit -= _unit;
-                }
+            if(req_id.equals(req_ids.get(i))) {
+                rem_units.set(i, rem_units.get(i) - unit);
+                tot_unit -= unit;
             }
         }
     }
-
 %>
 
 <br><p>Remaining unit is "<%= tot_unit %>"</p><br>
@@ -149,10 +145,14 @@
 <div>
   <% for(int i = 0; i < req_ids.size(); i++){ %>
   <p>
-    <%= types.get(i) %> has <%= rem_units.get(i) %> units remaining,
     <% if(rem_units.get(i) <= 0) { %>
-      <span style="color: green">Requirement Fulfilled</span>
+          <span style="color: green">Requirement Fulfilled</span>
     <% } %>
+
+    <% else{ %>
+    <%= types.get(i) %> has <%= rem_units.get(i) %> units remaining,
+    <% } %>
+    
   </p>
   <% } %>
   <br>

@@ -18,4 +18,4 @@ $CATALINA_HOME/bin/startup.sh
 # sleep 1
 
 # # Open the local server
-open http://localhost:8080/tritonlink/
+# open http://localhost:8080/tritonlink/
