@@ -82,9 +82,11 @@
   </tr>
 </table>
 
+<br>
 <table>
   <tr>
     <th>Type</th>
+    <th>Min Units Required</th>
   </tr>
 <%
     // For the selected degree, display their req_id, degree, course_type and min_units attributes
@@ -93,7 +95,7 @@
     pstmt_type.setString(1, _degree);
     ResultSet rs_type = pstmt_type.executeQuery();
 
-    String _type = "";
+
     int tot_unit = 0;
     ArrayList<String> req_ids = new ArrayList<String>();
     ArrayList<Integer> rem_units = new ArrayList<Integer>();
@@ -102,17 +104,21 @@
         req_ids.add(rs_type.getString("req_id"));
         rem_units.add(rs_type.getInt("min_units"));
         types.add(rs_type.getString("course_type"));
-        _type = rs_type.getString("course_type");
+        String _type = rs_type.getString("course_type");
+        int _min_units = rs_type.getInt("min_units");
         tot_unit += rs_type.getInt("min_units");
     
 %>
 
   <tr>
     <td><%= _type %></td>
+    <td><%= _min_units %></td>
   </tr>
 <%
     }
 %>
+
+<p> Total unit required is "<%= tot_unit %>"</p><br>
 
 </table>
 
@@ -144,16 +150,13 @@
 
 <div>
   <% for(int i = 0; i < req_ids.size(); i++){ %>
-  <p>
-    <% if(rem_units.get(i) <= 0) { %>
-          <span style="color: green">Requirement Fulfilled</span>
-    <% } %>
-
-    <% else{ %>
-    <%= types.get(i) %> has <%= rem_units.get(i) %> units remaining,
-    <% } %>
-    
-  </p>
+    <p>
+      <% if(rem_units.get(i) <= 0) { %>
+        <span style="color: green">Requirement Fulfilled</span>
+      <% } else { %>
+        <%= types.get(i) %> has <%= rem_units.get(i) %> units remaining,
+      <% } %>
+    </p>
   <% } %>
   <br>
 </div>
