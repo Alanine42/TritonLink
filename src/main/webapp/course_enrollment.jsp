@@ -232,7 +232,7 @@ function checkUpdate(row) {
           <option value="waitlist" <%= enrollment_status.equals("waitlist") ? "selected" : "" %>>waitlist</option>
         </select>
     </td>
-    <td><input type="submit" id="update_button_<%= rowN%>" value="Update" disabled></td>
+    <td><input type="submit" id="update_button_<%= rowN%>" value="Update"></td>
   </form>
   
   <form action="course_enrollment.jsp" method="get">         
