@@ -20,10 +20,12 @@ BEGIN
     FROM classes c, classes c2, meetings m2
     WHERE NEW.section_id = c.section_id
       AND c.faculty_name = c2.faculty_name
+	    AND c.quarter = c2.quarter
       AND c2.section_id = m2.section_id
       AND m2.day = NEW.day
       AND m2.start_time < NEW.end_time
       AND m2.end_time > NEW.start_time
+	  and new.section_id <> m2.section_id
   ) THEN
     RAISE EXCEPTION 'Meeting time conflicts with the professor''s availability in other sections meetings.';
   END IF;
@@ -37,4 +39,3 @@ CREATE or REPLACE TRIGGER meeting_overlap_trigger
   BEFORE INSERT OR UPDATE ON meetings
   FOR EACH ROW
   EXECUTE FUNCTION check_meeting_overlap();
-

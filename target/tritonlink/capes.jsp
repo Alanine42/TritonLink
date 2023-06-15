@@ -81,10 +81,10 @@
       if (prof.equals("all")){
         // No. 4
         Statement stmt = conn.createStatement();
-        stmt.executeUpdate("drop table if exists CPQG CASCADE");
-        stmt.executeUpdate("create table if not exists CPQG as (select c.course_id, c.quarter, c.faculty_name, ct.grade from classes c join classes_taken ct on c.section_id = ct.section_id )");
+        // stmt.executeUpdate("drop table if exists cpqg CASCADE");
+        // stmt.executeUpdate("create table if not exists cpqg as (select ct.student_id, c.course_id, c.quarter, c.faculty_name, ct.grade from classes c join classes_taken ct on c.section_id = ct.section_id )");
 
-        PreparedStatement pstmt = conn.prepareStatement("select grade, count(*) as grade_count from CPQG where course_id = ? group by grade");
+        PreparedStatement pstmt = conn.prepareStatement("select grade, count(*) as grade_count from cpqg where course_id = ? group by grade");
         pstmt.setString(1, course);
         String grade = "";
         int grade_count = 0;
@@ -100,10 +100,10 @@
       else {
         // No. 3 and No. 5
         Statement stmt2 = conn.createStatement();
-        stmt2.executeUpdate("drop table if exists CPG CASCADE");
-        stmt2.executeUpdate("create table if not exists CPG as (select c.course_id, c.faculty_name, ct.grade from classes c join classes_taken ct on c.section_id = ct.section_id )");
+        // stmt2.executeUpdate("drop table if exists cpg CASCADE");
+        // stmt2.executeUpdate("create table if not exists cpg as (select ct.student_id, c.course_id, c.faculty_name, ct.grade from classes c join classes_taken ct on c.section_id = ct.section_id )");
 
-        PreparedStatement pstmt = conn.prepareStatement("select grade, count(*) as grade_count from CPG where course_id = ? and faculty_name = ? group by grade");
+        PreparedStatement pstmt = conn.prepareStatement("select grade, count(*) as grade_count from cpg where course_id = ? and faculty_name = ? group by grade");
         pstmt.setString(1, course);
         pstmt.setString(2, prof);
 
@@ -118,7 +118,7 @@
 <%
         }
 
-        PreparedStatement pstmt2 = conn.prepareStatement("select avg(number_grade) from CPG a join grade_conversion b on a.grade = b.letter_grade where b.number_grade > 0 and course_id =? and faculty_name = ?");
+        PreparedStatement pstmt2 = conn.prepareStatement("select avg(number_grade) from cpg a join grade_conversion b on a.grade = b.letter_grade where b.number_grade > 0 and course_id =? and faculty_name = ?");
         pstmt2.setString(1, course);
         pstmt2.setString(2, prof);
 
@@ -138,10 +138,10 @@
     else{
       // No. 2
         Statement stmt3 = conn.createStatement();
-        stmt3.executeUpdate("drop table if exists CPQG CASCADE");
-        stmt3.executeUpdate("create table if not exists CPQG as (select c.course_id, c.quarter, c.faculty_name, ct.grade from classes c join classes_taken ct on c.section_id = ct.section_id )");
+        // stmt3.executeUpdate("drop table if exists cpqg CASCADE");
+        // stmt3.executeUpdate("create table if not exists cpqg as (select ct.student_id, c.course_id, c.quarter, c.faculty_name, ct.grade from classes c join classes_taken ct on c.section_id = ct.section_id )");
 
-        PreparedStatement pstmt = conn.prepareStatement("select grade, count(*) as grade_count from CPQG where course_id = ? and faculty_name = ? and quarter = ? group by grade");
+        PreparedStatement pstmt = conn.prepareStatement("select grade, count(*) as grade_count from cpqg where course_id = ? and faculty_name = ? and quarter = ? group by grade");
         pstmt.setString(1, course);
         pstmt.setString(2, prof);
         pstmt.setString(3, quarter);

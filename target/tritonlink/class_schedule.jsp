@@ -73,7 +73,7 @@
 <%  
   Statement stmt = conn.createStatement();
 
-  stmt.executeUpdate("drop table if exists taking CASCADE");
+  // stmt.executeUpdate("drop table if exists taking CASCADE");
 
   String sql = "create table taking as select c.title, c.course_id, m.day, m.start_time, m.end_time, m.section_id from course_enrollment ce join meetings m on ce.section_id = m.section_id join classes c on c.section_id = ce.section_id where student_id =? and c.quarter = 'Spring 2018'";
   PreparedStatement pstmt = conn.prepareStatement(sql);
